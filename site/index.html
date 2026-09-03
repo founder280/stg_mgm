@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MGMS — Mass Gathering Health Management System</title>
+    <meta
+      name="description"
+      content="A browser demonstration of the administration console and the offline-first field app for health services at a mass gathering."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M16 7v18M7 16h18' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --surface: #fcfcfb;
+        --page: #f4f4f0;
+        --card: #ffffff;
+        --ink: #0b0b0b;
+        --ink-2: #52514e;
+        --muted: #898781;
+        --line: #e1e0d9;
+        --brand: #2a78d6;
+        --warn: #fab219;
+        --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color-scheme: dark;
+          --surface: #1a1a19;
+          --page: #0d0d0d;
+          --card: #1a1a19;
+          --ink: #ffffff;
+          --ink-2: #c3c2b7;
+          --muted: #898781;
+          --line: #2c2c2a;
+          --brand: #3987e5;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: var(--font);
+        background: var(--page);
+        color: var(--ink);
+        line-height: 1.55;
+        font-size: 15px;
+      }
+      .wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 72px; }
+      header { margin-bottom: 26px; }
+      h1 { font-size: 27px; margin: 0 0 6px; letter-spacing: -0.02em; }
+      h2 { font-size: 17px; margin: 34px 0 10px; letter-spacing: -0.01em; }
+      p { margin: 0 0 12px; color: var(--ink-2); }
+      .lead { font-size: 16px; color: var(--ink-2); }
+      a { color: var(--brand); }
+
+      .notice {
+        border: 1px solid var(--warn);
+        background: color-mix(in srgb, var(--warn) 12%, transparent);
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 14px;
+        margin: 20px 0 8px;
+      }
+      .notice strong { color: var(--ink); }
+
+      .cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin: 18px 0; }
+      .card {
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 10px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .card h3 { margin: 0; font-size: 15px; }
+      .card p { font-size: 13.5px; margin: 0; flex: 1; }
+      .card .who { font-size: 12px; color: var(--muted); }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 14px;
+        border-radius: 7px;
+        background: var(--brand);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        margin-top: 4px;
+      }
+      .btn.ghost { background: transparent; color: var(--brand); border: 1px solid var(--line); }
+
+      .facts { display: flex; flex-wrap: wrap; gap: 20px; margin: 14px 0 4px; }
+      .fact .n { font-size: 21px; font-weight: 650; font-variant-numeric: tabular-nums; }
+      .fact .l { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
+      ol, ul { color: var(--ink-2); padding-left: 20px; margin: 0 0 12px; }
+      li { margin-bottom: 6px; }
+      code {
+        background: var(--page);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-size: 13px;
+      }
+      table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 12px; }
+      th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); }
+      th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+      footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Mass Gathering Health Management System</h1>
+        <p class="lead">
+          Health services for a mass gathering: an administration console for the state, a live GIS and surveillance
+          dashboard, and an offline-first field app for temporary medical camps.
+        </p>
+      </header>
+
+      <div class="notice">
+        <strong>▲ This is a demonstration, not a live system.</strong> GitHub Pages serves static files, so there is no
+        server and no database here. Both apps carry a snapshot of the seeded gathering and compute everything —
+        syndrome classification, triage, outbreak detection, the spatial scan, stock projection — in your browser, using
+        the very same shared code the real API runs. Nothing you change is saved; reload and it is back.
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Administration console</h3>
+          <p class="who">For officers, from a camp supervisor up to the state</p>
+          <p>
+            The live dashboard with coordinated views — click any bar, day or camp and every panel narrows — plus users,
+            the role and permission matrix, the address hierarchy, facilities and masters.
+          </p>
+          <a class="btn" href="./console/">Open the console</a>
+        </div>
+
+        <div class="card">
+          <h3>Field app</h3>
+          <p class="who">For volunteers, paramedics and medical officers at the camp</p>
+          <p>
+            The walk-in form and its three-part split. Installable, and genuinely offline — turn your network off
+            mid-consultation and keep working. Best opened on a phone.
+          </p>
+          <a class="btn" href="./camp/">Open the field app</a>
+        </div>
+      </div>
+
+      <h2>What the seeded gathering contains</h2>
+      <div class="facts" id="facts">
+        <div class="fact"><div class="n">1,722</div><div class="l">walk-ins</div></div>
+        <div class="fact"><div class="n">8</div><div class="l">camps</div></div>
+        <div class="fact"><div class="n">10</div><div class="l">days</div></div>
+        <div class="fact"><div class="n">3</div><div class="l">districts</div></div>
+        <div class="fact"><div class="n">10</div><div class="l">roles</div></div>
+      </div>
+      <p>
+        The Karthigai Deepam festival at Tiruvannamalai, with a zoned festival area, staff for every role, and a
+        waterborne diarrhoea outbreak planted in one sector over the final three days — so the detectors have something
+        real to find rather than something announced.
+      </p>
+
+      <h2>What to try, in about three minutes</h2>
+      <ol>
+        <li>
+          Open the console as <code>state.admin</code>. In <strong>Surveillance signals</strong>, look for
+          <em>Acute Diarrhoeal Disease</em> at <em>Girivalam North Medical Camp</em> — roughly 30 cases against under 2
+          expected, flagged by several independent detectors.
+        </li>
+        <li>
+          Click that syndrome's bar. Every panel narrows at once. On the map, the same sector carries the largest circles
+          and a cluster ring: a temporal detector and a spatial scan agreeing, independently.
+        </li>
+        <li>
+          Sign out and back in as <code>district.tvm</code>, then <code>district.cud</code>. Each sees only their own
+          district. As <code>girin1.sup</code>, the roles console is not even in the navigation.
+        </li>
+        <li>
+          Open the field app as <code>girin1.vol1</code> and register a walk-in with <em>Fever</em> and
+          <em>Bleeding from gums</em>. Before you forward it, the app names the syndrome and cites IDSP.
+        </li>
+        <li>
+          Then <strong>turn your network off</strong> and keep going. Register another patient. Reload the page. It comes
+          back, still signed in, with your records intact.
+        </li>
+      </ol>
+
+      <h2>Demonstration accounts</h2>
+      <p>Any password is accepted here. On the real system these are argon2 hashes with lockout.</p>
+      <table>
+        <thead><tr><th>Username</th><th>Role</th><th>Sees</th></tr></thead>
+        <tbody>
+          <tr><td><code>state.admin</code></td><td>State Super User</td><td>Everything, including the admin console</td></tr>
+          <tr><td><code>state.officer</code></td><td>State Level Officer</td><td>State-wide operations, no role editing</td></tr>
+          <tr><td><code>district.tvm</code></td><td>District Level User</td><td>Tiruvannamalai only</td></tr>
+          <tr><td><code>district.cud</code></td><td>District Level User</td><td>Cuddalore only</td></tr>
+          <tr><td><code>girin1.sup</code></td><td>Supervisory Staff</td><td>One camp, dashboard but no admin</td></tr>
+          <tr><td><code>girin1.mo</code></td><td>Field Staff (Medical Officer)</td><td>Field app: investigations and treatment</td></tr>
+          <tr><td><code>girin1.para</code></td><td>Field Staff (Paramedic)</td><td>Field app: measurements</td></tr>
+          <tr><td><code>girin1.vol1</code></td><td>Volunteer</td><td>Field app: registration only</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Running the real thing</h2>
+      <p>
+        The demonstration cannot show what needs a server: PostgreSQL, the scheduled surveillance pass, real sync between
+        devices, or authentication. For that, run the stack — it is three commands with Docker, or open the repository in
+        GitHub Codespaces, where the API, the database and both apps come up in your browser with nothing to install.
+      </p>
+      <p>
+        <a class="btn ghost" href="https://github.com/founder280/stg_mgm">Repository</a>
+        <a class="btn ghost" href="https://github.com/codespaces/new?repo=founder280/stg_mgm">Open in Codespaces</a>
+      </p>
+
+      <footer>
+        Syndrome case definitions follow the IDSP syndromic surveillance categories published by the National Centre for
+        Disease Control, Government of India. The dashboard's coordinated-views design follows
+        <a href="https://github.com/spalladino/mgviz-dc">mgviz-dc</a>.
+      </footer>
+    </div>
+  </body>
+</html>

@@ -5,6 +5,20 @@ console for the state, a live GIS and surveillance dashboard for every level
 from supervisor upwards, and an offline-first field app for recording walk-ins
 at temporary medical camps.
 
+**Try it in a browser** — no install, no account:
+
+| | |
+|---|---|
+| **Console and dashboard** | `https://<owner>.github.io/<repo>/console/` |
+| **Field app** (best on a phone) | `https://<owner>.github.io/<repo>/camp/` |
+| **The real stack** | [Open in Codespaces](https://github.com/codespaces/new) |
+
+The published site is a *demonstration*: GitHub Pages has no server, so both
+apps carry a snapshot of the seeded gathering and compute everything — including
+the outbreak detection — in your browser, using the same shared code the API
+runs. Codespaces runs the genuine article, database and all.
+[`docs/demo.md`](docs/demo.md) explains exactly what is and is not real.
+
 The field form implements the *Onsite Medical Camp Data Collection* specification
 — its nine questions, its validation rules, its auto-captured provenance, and its
 three-part split between a volunteer, a paramedic and a medical officer.
@@ -19,7 +33,9 @@ three-part split between a volunteer, a paramedic and a medical officer.
 | `services/api` | Express + Prisma + PostgreSQL. Auth, admin, the clinical workflow, offline sync, dashboard aggregation and the scheduled surveillance pass. |
 | `apps/web` | React console: admin surfaces and the live dashboard. |
 | `apps/mobile` | Installable offline-first PWA used at the camp. |
-| `docs/` | Architecture, data model, API reference, RBAC, the form mapping, and deployment. |
+| `packages/demo` | An in-browser stand-in for the API, so both apps can be published as a static demonstration. |
+| `site/` | The demonstration landing page. |
+| `docs/` | Architecture, data model, API reference, RBAC, the form mapping, testing and deployment. |
 
 ## Running it locally
 
@@ -101,6 +117,7 @@ the consultation rather than after it reaches a server.
 
 ## Where to read next
 
+- [`docs/demo.md`](docs/demo.md) — the browser demonstration and Codespaces, and what each does not cover
 - [`docs/testing.md`](docs/testing.md) — how to verify all of this, automated and by hand
 - [`docs/architecture.md`](docs/architecture.md) — how the parts fit and why
 - [`docs/field-form.md`](docs/field-form.md) — every question in the specification, and where it lives

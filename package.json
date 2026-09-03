@@ -28,7 +28,9 @@
     "test:unit": "npm run test -w @mgms/shared",
     "test:api": "npm run test -w @mgms/api",
     "preview:web": "npm run preview -w @mgms/web",
-    "preview:mobile": "npm run preview -w @mgms/mobile"
+    "preview:mobile": "npm run preview -w @mgms/mobile",
+    "demo:snapshot": "npm run demo:snapshot -w @mgms/api",
+    "demo:build": "node scripts/build-demo-site.mjs"
   },
   "devDependencies": {
     "playwright": "^1.62.1",

@@ -7,12 +7,14 @@
     "dev": "vite --port 5174",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build:demo": "tsc -b && vite build --mode demo"
   },
   "dependencies": {
     "@mgms/shared": "*",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "@mgms/demo": "*"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

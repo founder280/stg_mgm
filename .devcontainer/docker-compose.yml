@@ -1,0 +1,34 @@
+# The dev container runs the real stack: a Node workspace and a real
+# PostgreSQL, so Codespaces exercises the actual API and database rather than
+# the static demonstration.
+
+services:
+  workspace:
+    image: mcr.microsoft.com/devcontainers/typescript-node:22
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    environment:
+      DATABASE_URL: postgresql://mgms:mgms@db:5432/mgms?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    network_mode: service:db
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mgms
+      POSTGRES_PASSWORD: mgms
+      POSTGRES_DB: mgms
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U mgms -d mgms']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  db-data:

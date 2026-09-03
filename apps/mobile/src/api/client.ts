@@ -6,6 +6,8 @@
  * show the user mid-consultation.
  */
 
+import { transport } from './transport';
+
 const REFRESH_KEY = 'mgms.camp.refresh';
 const SESSION_KEY = 'mgms.camp.session';
 
@@ -75,7 +77,7 @@ function adopt(auth: AuthResponse): CampSession {
 }
 
 export async function login(username: string, password: string, deviceId: string): Promise<CampSession> {
-  const res = await fetch('/api/auth/login', {
+  const res = await transport('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password, deviceId }),
@@ -113,7 +115,7 @@ async function performRefresh(deviceId: string): Promise<CampSession | null> {
   const refreshToken = readStored<string>(REFRESH_KEY);
   if (!refreshToken) return null;
 
-  const res = await fetch('/api/auth/refresh', {
+  const res = await transport('/api/auth/refresh', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken, deviceId }),
@@ -144,7 +146,7 @@ export async function apiFetch<T>(
   options: { method?: string; body?: unknown; deviceId: string },
 ): Promise<T> {
   const send = () =>
-    fetch(`/api${path}`, {
+    transport(`/api${path}`, {
       method: options.method ?? 'GET',
       headers: {
         ...(options.body ? { 'Content-Type': 'application/json' } : {}),

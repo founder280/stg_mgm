@@ -10,3 +10,6 @@ coverage/
 .pgdata/
 services/api/prisma/*.db
 *.tsbuildinfo
+
+# Built by `npm run demo:build`.
+site-dist/

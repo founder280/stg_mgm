@@ -1,0 +1,39 @@
+{
+  "name": "MGMS — full stack",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "forwardPorts": [4000, 5173, 5174],
+  "portsAttributes": {
+    "4000": { "label": "API", "onAutoForward": "silent" },
+    "5173": { "label": "Console", "onAutoForward": "openPreview" },
+    "5174": { "label": "Field app", "onAutoForward": "notify" }
+  },
+
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postAttachCommand": {
+    "hint": "echo '\\nRun: npm run dev   — then open the Console on port 5173 and the Field app on 5174.\\nSign in as state.admin / ChangeMe@2026\\n'"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "Prisma.prisma",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "editor.formatOnSave": false,
+        "typescript.tsdk": "node_modules/typescript/lib"
+      }
+    }
+  },
+
+  "remoteUser": "node"
+}

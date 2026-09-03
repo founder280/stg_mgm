@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { PERMISSIONS } from '@mgms/shared';
+import { DemoBanner } from './DemoBanner';
 
 interface NavItem {
   to: string;
@@ -70,6 +71,7 @@ export function Layout() {
       </nav>
 
       <div className="main">
+        <DemoBanner />
         <header className="topbar">
           <div>
             <div style={{ fontWeight: 600 }}>{session?.fullName}</div>

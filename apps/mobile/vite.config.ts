@@ -2,13 +2,23 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+// A demo build is served from a subdirectory on GitHub Pages, so the base
+// path has to be baked in; a normal build stays at the site root.
+const base = process.env.MGMS_BASE ?? '/camp/';
+
+export default defineConfig(({ mode }) => ({
+  base: mode === 'demo' ? base : '/',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png'],
+      // The published demo lives under a subdirectory, so the manifest's
+      // scope and start URL must follow the same base.
       manifest: {
+        id: base,
+        scope: base,
+        start_url: base,
         name: 'MGMS Camp — Onsite Medical Camp Data Collection',
         short_name: 'MGMS Camp',
         description:
@@ -17,7 +27,6 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
@@ -51,5 +60,10 @@ export default defineConfig({
     port: 5175,
     proxy: { '/api': { target: 'http://localhost:4000', changeOrigin: true } },
   },
-  build: { outDir: 'dist', sourcemap: true },
-});
+  build: {
+    outDir: 'dist',
+    // Source maps are useful in a deployed app you operate; on a public static
+    // demo they triple the download for no benefit to a visitor.
+    sourcemap: mode !== 'demo',
+  },
+}));

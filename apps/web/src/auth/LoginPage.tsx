@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from './AuthContext';
 import { ApiError } from '../api/client';
+import { IS_DEMO } from '../api/transport';
 
 export function LoginPage() {
   const { signIn } = useAuth();
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState(IS_DEMO ? 'demo' : '');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -68,9 +69,27 @@ export function LoginPage() {
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
 
-        <p className="tiny muted" style={{ marginTop: 16, marginBottom: 0 }}>
-          Access is granted by your department. Contact the state administrator if you cannot sign in.
-        </p>
+        {IS_DEMO ? (
+          <div className="banner" style={{ marginTop: 16 }}>
+            <strong>Demonstration.</strong> Any password works. Try{' '}
+            <button type="button" className="btn btn-sm" onClick={() => setUsername('state.admin')} style={{ margin: '0 2px' }}>
+              state.admin
+            </button>
+            for state-wide access,{' '}
+            <button type="button" className="btn btn-sm" onClick={() => setUsername('district.tvm')} style={{ margin: '0 2px' }}>
+              district.tvm
+            </button>
+            for one district, or{' '}
+            <button type="button" className="btn btn-sm" onClick={() => setUsername('girin1.sup')} style={{ margin: '0 2px' }}>
+              girin1.sup
+            </button>
+            for a camp supervisor — the scope rules are enforced here exactly as they are on the server.
+          </div>
+        ) : (
+          <p className="tiny muted" style={{ marginTop: 16, marginBottom: 0 }}>
+            Access is granted by your department. Contact the state administrator if you cannot sign in.
+          </p>
+        )}
       </form>
     </div>
   );

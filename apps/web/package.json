@@ -7,7 +7,8 @@
     "dev": "vite --port 5173",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build:demo": "tsc -b && vite build --mode demo"
   },
   "dependencies": {
     "@mgms/shared": "*",
@@ -15,7 +16,8 @@
     "d3-geo": "^3.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0"
+    "react-router-dom": "^6.28.0",
+    "@mgms/demo": "*"
   },
   "devDependencies": {
     "@types/d3-geo": "^3.1.0",

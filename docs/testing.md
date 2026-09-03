@@ -1,5 +1,9 @@
 # How to test this
 
+> Looking to just *look* at it? The published demonstration and the Codespaces
+> path are in [`docs/demo.md`](demo.md) — no install required. This page is
+> about verifying it.
+
 Four layers, cheapest first. The first two need nothing but a database; the
 last two need the stack running.
 

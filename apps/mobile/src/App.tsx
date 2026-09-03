@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ageInMonths, classifySyndromes, scoreTriage, type RegistrationInput } from '@mgms/shared';
 import { useSync } from './sync/SyncProvider';
+import { IS_DEMO } from './api/transport';
 import { LoginScreen } from './screens/LoginScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { RegistrationFlow, emptyDraft, type RegistrationDraft } from './screens/RegistrationFlow';
@@ -310,6 +311,13 @@ export function App() {
       </header>
 
       <div className="body">
+        {IS_DEMO && (
+          <div className="banner warn" style={{ fontSize: 13 }}>
+            <strong>Demonstration.</strong> Nothing is saved to a server. Turning your network off is still worth
+            trying — the offline queue is the real one.
+          </div>
+        )}
+
         {notice && (
           <div className={`banner ${notice.includes('RED') ? 'err' : 'ok'}`} role="status">
             {notice}

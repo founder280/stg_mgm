@@ -7,6 +7,8 @@
  * a usable bearer token on disk.
  */
 
+import { transport } from './transport';
+
 const REFRESH_KEY = 'mgms.refresh';
 
 export interface Session {
@@ -80,7 +82,7 @@ function adopt(auth: AuthResponse): Session {
 }
 
 export async function login(username: string, password: string): Promise<Session> {
-  const res = await fetch('/api/auth/login', {
+  const res = await transport('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
@@ -95,7 +97,7 @@ export async function restoreSession(): Promise<Session | null> {
   const refreshToken = storedRefreshToken();
   if (!refreshToken) return null;
 
-  const res = await fetch('/api/auth/refresh', {
+  const res = await transport('/api/auth/refresh', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken }),
@@ -110,7 +112,7 @@ export async function restoreSession(): Promise<Session | null> {
 export async function logout(): Promise<void> {
   const refreshToken = storedRefreshToken();
   if (refreshToken) {
-    await fetch('/api/auth/logout', {
+    await transport('/api/auth/logout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -136,7 +138,7 @@ export async function request<T>(
   options: { method?: string; body?: unknown; signal?: AbortSignal; raw?: boolean } = {},
 ): Promise<T> {
   const send = async () =>
-    fetch(`/api${path}`, {
+    transport(`/api${path}`, {
       method: options.method ?? 'GET',
       headers: {
         ...(options.body ? { 'Content-Type': 'application/json' } : {}),

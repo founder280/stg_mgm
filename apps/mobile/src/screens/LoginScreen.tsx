@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { useSync } from '../sync/SyncProvider';
 import { ApiError, OfflineError } from '../api/client';
+import { IS_DEMO } from '../api/transport';
 
 export function LoginScreen() {
   const { signIn, online, deviceId } = useSync();
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState(IS_DEMO ? 'demo' : '');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -34,6 +35,15 @@ export function LoginScreen() {
         <h1>Onsite Medical Camp</h1>
         <p className="lead">Data collection · Mass Gathering Health Management System</p>
 
+        {IS_DEMO && (
+          <div className="banner warn">
+            <strong>Demonstration.</strong> No server and no database — the app answers itself in your browser. Sign in
+            as <strong>girin1.vol1</strong> (volunteer), <strong>girin1.para</strong> (paramedic) or{' '}
+            <strong>girin1.mo</strong> (medical officer); any password works. The offline behaviour is real: turn your
+            network off and keep going.
+          </div>
+        )}
+
         {!online && (
           <div className="banner warn">
             This device is offline. Sign in once with a connection; after that the app works without one.
@@ -51,6 +61,15 @@ export function LoginScreen() {
             onChange={(e) => setUsername(e.target.value)}
             required
           />
+          {IS_DEMO && (
+            <div className="row" style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+              {['girin1.vol1', 'girin1.para', 'girin1.mo'].map((account) => (
+                <button key={account} type="button" className="btn small" onClick={() => setUsername(account)}>
+                  {account.replace('girin1.', '')}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="q">
