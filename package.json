@@ -8,7 +8,9 @@
     "services/*",
     "apps/*"
   ],
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "npm run build -w @mgms/shared && npm run build -w @mgms/api && npm run build -w @mgms/web && npm run build -w @mgms/mobile",
     "dev": "npm run dev -w @mgms/api & npm run dev -w @mgms/web & npm run dev -w @mgms/mobile",
@@ -20,7 +22,9 @@
     "lint": "npm run typecheck",
     "db:migrate": "npm run db:migrate -w @mgms/api",
     "db:seed": "npm run db:seed -w @mgms/api",
-    "db:reset": "npm run db:reset -w @mgms/api"
+    "db:reset": "npm run db:reset -w @mgms/api",
+    "analytics:run": "npm run analytics:run -w @mgms/api",
+    "test:e2e": "npm run test -w @mgms/api"
   },
   "devDependencies": {
     "typescript": "^5.6.3",

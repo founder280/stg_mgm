@@ -7,6 +7,7 @@ import { asyncHandler } from '../../middleware/error-handler.js';
 import { requirePermission } from '../../middleware/rbac.js';
 import { parsed, validate } from '../../middleware/validate.js';
 import { hashPassword } from '../../services/auth.service.js';
+import { assertAssignmentsWithinScope } from '../../services/scope.service.js';
 import { recordAudit } from '../../services/audit.service.js';
 import { param } from '../../lib/params.js';
 
@@ -101,17 +102,10 @@ usersRouter.post(
       throw ApiError.forbidden(`Your role cannot create users with the role ${input.roleCode}`);
     }
 
-    // Assignments must sit inside the creator's own scope.
-    if (principal.scope.level !== 'STATE') {
-      const allowed = new Set([
-        ...principal.scope.districtIds,
-        ...principal.scope.campIds,
-        ...principal.scope.regionIds,
-        ...principal.scope.facilityIds,
-      ]);
-      const outside = input.assignments.filter((a) => !allowed.has(a.scopeId));
-      if (outside.length > 0) throw ApiError.forbidden('You cannot assign a user outside your own area');
-    }
+    // Assignments must resolve to something inside the creator's own scope —
+    // a district officer staffs camps within their district, whose ids are
+    // not themselves in their scope.
+    await assertAssignmentsWithinScope(principal.scope, input.assignments);
 
     const user = await prisma.user.create({
       data: {

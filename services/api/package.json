@@ -14,7 +14,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma migrate reset --force"
+    "db:reset": "prisma migrate reset --force",
+    "analytics:run": "tsx src/scripts/run-analytics.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

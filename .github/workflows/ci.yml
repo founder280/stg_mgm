@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: mgms
+          POSTGRES_PASSWORD: mgms
+          POSTGRES_DB: mgms_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U mgms"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://mgms:mgms@localhost:5432/mgms_test?schema=public
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the shared domain package
+        run: npm run build --workspace @mgms/shared
+
+      - name: Generate the Prisma client
+        run: npx prisma generate --schema services/api/prisma/schema.prisma
+
+      - name: Type-check every workspace
+        run: npm run typecheck
+
+      - name: Domain unit tests
+        run: npm test --workspace @mgms/shared
+
+      - name: API integration tests
+        run: npm test --workspace @mgms/api
+
+      - name: Build the console and the field app
+        run: |
+          npm run build --workspace @mgms/web
+          npm run build --workspace @mgms/mobile
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the container images
+        run: |
+          docker build -f services/api/Dockerfile -t mgms-api .
+          docker build -f apps/web/Dockerfile -t mgms-web .
+          docker build -f apps/mobile/Dockerfile -t mgms-mobile .

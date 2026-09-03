@@ -115,3 +115,74 @@ export async function assertCampAccess(scope: UserScope, campId: string): Promis
     throw ApiError.forbidden('This camp is outside your assigned area');
   }
 }
+
+/**
+ * Check that every assignment a user is being given sits inside the creator's
+ * own scope.
+ *
+ * Comparing raw ids is not enough: a district officer's scope holds district
+ * ids, but the camps they legitimately staff are identified by camp id. Each
+ * assignment is therefore resolved to the entity it points at and tested for
+ * containment.
+ */
+export async function assertAssignmentsWithinScope(
+  scope: UserScope,
+  assignments: Array<{ scopeType: ScopeLevel; scopeId: string }>,
+): Promise<void> {
+  if (scope.level === 'STATE' || assignments.length === 0) return;
+  const { ApiError } = await import('../errors.js');
+
+  const campIds = assignments.filter((a) => a.scopeType === 'CAMP').map((a) => a.scopeId);
+  const camps = campIds.length
+    ? await prisma.camp.findMany({
+        where: { id: { in: campIds } },
+        select: { id: true, districtId: true, facilityId: true },
+      })
+    : [];
+  const campById = new Map(camps.map((c) => [c.id, c]));
+
+  const facilityIds = assignments.filter((a) => a.scopeType === 'FACILITY').map((a) => a.scopeId);
+  const facilities = facilityIds.length
+    ? await prisma.facility.findMany({ where: { id: { in: facilityIds } }, select: { id: true, districtId: true } })
+    : [];
+  const facilityById = new Map(facilities.map((f) => [f.id, f]));
+
+  for (const assignment of assignments) {
+    let permitted = false;
+
+    switch (assignment.scopeType) {
+      case 'CAMP': {
+        const camp = campById.get(assignment.scopeId);
+        permitted =
+          camp != null &&
+          (scope.campIds.includes(camp.id) ||
+            scope.districtIds.includes(camp.districtId) ||
+            (camp.facilityId != null && scope.facilityIds.includes(camp.facilityId)));
+        break;
+      }
+      case 'FACILITY': {
+        const facility = facilityById.get(assignment.scopeId);
+        permitted =
+          facility != null &&
+          (scope.facilityIds.includes(facility.id) ||
+            (facility.districtId != null && scope.districtIds.includes(facility.districtId)));
+        break;
+      }
+      case 'DISTRICT':
+        permitted = scope.districtIds.includes(assignment.scopeId);
+        break;
+      case 'REGION':
+        permitted = scope.regionIds.includes(assignment.scopeId);
+        break;
+      case 'DEPARTMENT':
+        permitted = scope.departmentIds.includes(assignment.scopeId);
+        break;
+      default:
+        permitted = false;
+    }
+
+    if (!permitted) {
+      throw ApiError.forbidden('You cannot assign a user outside your own area');
+    }
+  }
+}
