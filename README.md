@@ -19,6 +19,10 @@ the outbreak detection — in your browser, using the same shared code the API
 runs. Codespaces runs the genuine article, database and all.
 [`docs/demo.md`](docs/demo.md) explains exactly what is and is not real.
 
+> **First time only:** an admin must set **Settings → Pages → Source: GitHub
+> Actions**, then re-run the *Demonstration site* workflow. A workflow cannot
+> turn Pages on for its own repository.
+
 The field form implements the *Onsite Medical Camp Data Collection* specification
 — its nine questions, its validation rules, its auto-captured provenance, and its
 three-part split between a volunteer, a paramedic and a medical officer.

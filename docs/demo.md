@@ -12,13 +12,26 @@ https://<owner>.github.io/<repo>/console/    administration console and dashboar
 https://<owner>.github.io/<repo>/camp/       field app
 ```
 
-The workflow enables Pages itself on its first successful run
-(`configure-pages` with `enablement: true`), then publishes on every push to
-the default branch and on demand from the Actions tab.
+### One-time setup — required
 
-If your organisation restricts who may turn Pages on, that step will fail with
-*Get Pages site failed*; an admin then sets Settings → Pages → *Build and
-deployment* → Source: **GitHub Actions** once, and re-runs the workflow.
+A repository admin must do this once, before the first publish:
+
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions**
+2. **Settings → Actions → General → Workflow permissions:** *Read and write
+   permissions* (the deploy step needs to mint an id-token).
+
+Then re-run the **Demonstration site** workflow from the Actions tab. After
+that it publishes automatically on every push to the default branch.
+
+**The workflow cannot do step 1 for you.** `actions/configure-pages` has an
+`enablement: true` option, but the default `GITHUB_TOKEN` is refused by the
+"create a Pages site" API with *Resource not accessible by integration* no
+matter what `permissions:` the workflow declares. It needs a personal access
+token, which is not worth introducing for a one-click setting.
+
+Until step 1 is done, the workflow fails at `configure-pages` with *Get Pages
+site failed* — everything before it (seeding, the snapshot export and both app
+builds) succeeds, so a failure there means the setting, not the code.
 
 ### What is real in it
 
