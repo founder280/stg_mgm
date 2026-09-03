@@ -12,9 +12,13 @@ https://<owner>.github.io/<repo>/console/    administration console and dashboar
 https://<owner>.github.io/<repo>/camp/       field app
 ```
 
-**One-time setup by a repository admin:** Settings → Pages → *Build and
-deployment* → Source: **GitHub Actions**. The workflow then publishes on every
-push to the default branch, and can be run on demand from the Actions tab.
+The workflow enables Pages itself on its first successful run
+(`configure-pages` with `enablement: true`), then publishes on every push to
+the default branch and on demand from the Actions tab.
+
+If your organisation restricts who may turn Pages on, that step will fail with
+*Get Pages site failed*; an admin then sets Settings → Pages → *Build and
+deployment* → Source: **GitHub Actions** once, and re-runs the workflow.
 
 ### What is real in it
 
