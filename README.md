@@ -64,15 +64,22 @@ Console on `:8080`, field app on `:8081`, API on `:4000`.
 ## Tests
 
 ```bash
-npm test                  # domain unit tests + API integration tests
-npm run typecheck         # every workspace
+npm run test:unit     # 30 domain tests — no infrastructure
+npm run test:api      # 57 integration tests against a real PostgreSQL
+npm run test:e2e      # 52 end-to-end checks against a running stack
+npm run typecheck     # every workspace
 ```
 
 The domain tests cover the syndrome classifier, triage scoring and every
 surveillance algorithm against known inputs. The API tests run against a real
-PostgreSQL database and cover authentication, permission and scope enforcement,
-the form's validation rules, the staged clinical workflow, stock movement,
-offline sync semantics and aberration detection.
+database and cover authentication, permission and scope enforcement, the form's
+validation rules, the staged clinical workflow, stock movement, offline sync
+semantics and aberration detection. The end-to-end checks walk one patient
+through the full clinical pathway with three people signing in, and drive the
+field app in a real browser with the network pulled out mid-consultation.
+
+**[`docs/testing.md`](docs/testing.md) is the full guide**, including what to
+click through by hand to satisfy yourself the thing works.
 
 ## The three interfaces
 
@@ -94,6 +101,7 @@ the consultation rather than after it reaches a server.
 
 ## Where to read next
 
+- [`docs/testing.md`](docs/testing.md) — how to verify all of this, automated and by hand
 - [`docs/architecture.md`](docs/architecture.md) — how the parts fit and why
 - [`docs/field-form.md`](docs/field-form.md) — every question in the specification, and where it lives
 - [`docs/rbac.md`](docs/rbac.md) — the ten roles, their permissions and how data scope is enforced

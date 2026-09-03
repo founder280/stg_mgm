@@ -55,10 +55,40 @@ jobs:
       - name: API integration tests
         run: npm test --workspace @mgms/api
 
+      - name: Build the API
+        run: npm run build --workspace @mgms/api
+
       - name: Build the console and the field app
         run: |
           npm run build --workspace @mgms/web
           npm run build --workspace @mgms/mobile
+
+      - name: Install a browser for the end-to-end checks
+        run: npx playwright install --with-deps chromium
+
+      - name: Seed a gathering and start the stack
+        env:
+          DATABASE_URL: postgresql://mgms:mgms@localhost:5432/mgms_e2e?schema=public
+          JWT_ACCESS_SECRET: ci-access-secret-that-is-long-enough-for-validation
+          JWT_REFRESH_SECRET: ci-refresh-secret-that-is-long-enough-for-validation
+          ANALYTICS_INTERVAL_MINUTES: '0'
+        run: |
+          npx prisma migrate deploy --schema services/api/prisma/schema.prisma
+          npm run db:seed
+          npm run analytics:run
+          node services/api/dist/server.js & echo $! > /tmp/api.pid
+          npx vite preview --config apps/mobile/vite.config.ts & echo $! > /tmp/field.pid
+          timeout 60 sh -c 'until curl -sf localhost:4000/health/ready; do sleep 1; done'
+          timeout 60 sh -c 'until curl -sf -o /dev/null localhost:5175; do sleep 1; done'
+
+      - name: End-to-end checks
+        env:
+          MGMS_FIELD_URL: http://localhost:5175
+        run: npm run test:e2e
+
+      - name: Stop the stack
+        if: always()
+        run: kill "$(cat /tmp/api.pid)" "$(cat /tmp/field.pid)" 2>/dev/null || true
 
   docker:
     runs-on: ubuntu-latest

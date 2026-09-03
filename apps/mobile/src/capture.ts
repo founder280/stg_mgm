@@ -36,19 +36,38 @@ export function serialiseCapture(capture: CaptureMetaInput) {
   };
 }
 
-/** Best-effort GPS. A camp under a canopy may never get a fix; that is fine. */
+/**
+ * Best-effort GPS. A camp under a canopy may never get a fix; that is fine.
+ *
+ * The result is raced against a wall-clock deadline and never rejects. The
+ * Geolocation API's own `timeout` only starts once permission is decided, so a
+ * prompt the user never answers leaves `getCurrentPosition` pending forever —
+ * which would hang the save and silently lose the record. Location is
+ * best-effort metadata and must never gate a clinical record.
+ */
 export function currentPosition(timeoutMs = 6000): Promise<{ latitude: number; longitude: number; accuracyM: number } | null> {
   if (!navigator.geolocation) return Promise.resolve(null);
-  return new Promise((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-      (position) =>
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracyM: position.coords.accuracy,
-        }),
-      () => resolve(null),
-      { timeout: timeoutMs, maximumAge: 60_000, enableHighAccuracy: false },
-    );
+
+  const fix = new Promise<{ latitude: number; longitude: number; accuracyM: number } | null>((resolve) => {
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (position) =>
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracyM: position.coords.accuracy,
+          }),
+        () => resolve(null),
+        { timeout: timeoutMs, maximumAge: 60_000, enableHighAccuracy: false },
+      );
+    } catch {
+      resolve(null);
+    }
   });
+
+  const deadline = new Promise<null>((resolve) => {
+    setTimeout(() => resolve(null), timeoutMs);
+  });
+
+  return Promise.race([fix, deadline]);
 }

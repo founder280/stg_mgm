@@ -24,9 +24,14 @@
     "db:seed": "npm run db:seed -w @mgms/api",
     "db:reset": "npm run db:reset -w @mgms/api",
     "analytics:run": "npm run analytics:run -w @mgms/api",
-    "test:e2e": "npm run test -w @mgms/api"
+    "test:e2e": "node e2e/run-all.mjs",
+    "test:unit": "npm run test -w @mgms/shared",
+    "test:api": "npm run test -w @mgms/api",
+    "preview:web": "npm run preview -w @mgms/web",
+    "preview:mobile": "npm run preview -w @mgms/mobile"
   },
   "devDependencies": {
+    "playwright": "^1.62.1",
     "typescript": "^5.6.3",
     "vitest": "^2.1.8"
   }
