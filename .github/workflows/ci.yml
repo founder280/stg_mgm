@@ -66,6 +66,12 @@ jobs:
       - name: Install a browser for the end-to-end checks
         run: npx playwright install --with-deps chromium
 
+      # The field app is served from its production build, because the
+      # service worker — and therefore the offline restart the e2e checks
+      # exercise — is only registered there. It must be started through the
+      # workspace script: `vite preview --config apps/mobile/vite.config.ts`
+      # from the repository root resolves Vite's `root` to the cwd, so it
+      # serves an empty directory and every check fails.
       - name: Seed a gathering and start the stack
         env:
           DATABASE_URL: postgresql://mgms:mgms@localhost:5432/mgms_e2e?schema=public
@@ -77,7 +83,7 @@ jobs:
           npm run db:seed
           npm run analytics:run
           node services/api/dist/server.js & echo $! > /tmp/api.pid
-          npx vite preview --config apps/mobile/vite.config.ts & echo $! > /tmp/field.pid
+          npm run preview --workspace @mgms/mobile & echo $! > /tmp/field.pid
           timeout 60 sh -c 'until curl -sf localhost:4000/health/ready; do sleep 1; done'
           timeout 60 sh -c 'until curl -sf -o /dev/null localhost:5175; do sleep 1; done'
 
