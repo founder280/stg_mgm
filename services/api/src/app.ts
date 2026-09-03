@@ -26,7 +26,11 @@ export function createApp(): Express {
       origin: (origin, callback) => {
         // Native app shells and server-to-server calls send no Origin header.
         if (!origin || config.corsOrigins.includes(origin)) return callback(null, true);
-        return callback(new Error(`Origin ${origin} is not allowed`));
+        // Deny by omitting the header rather than throwing: an exception here
+        // surfaces as a 500 with a stack trace, which misreports a routine
+        // configuration mismatch as a server fault.
+        logger.warn({ origin }, 'Blocked a cross-origin request from an unlisted origin');
+        return callback(null, false);
       },
       credentials: true,
     }),

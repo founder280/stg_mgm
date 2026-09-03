@@ -1,0 +1,275 @@
+/*
+ * Field styling.
+ *
+ * Built for a tablet held in direct sunlight by someone wearing gloves:
+ * high contrast, 48px minimum touch targets, no hover-only affordances, and
+ * type large enough to read at arm's length. Dark mode is deliberately not
+ * offered — a camp screen is read outdoors, where a dark UI is unreadable.
+ */
+
+:root {
+  color-scheme: light;
+  --brand: #0b5cad;
+  --brand-dark: #084780;
+  --ink: #101010;
+  --ink-2: #45443f;
+  --muted: #6f6d66;
+  --line: #d8d7d0;
+  --surface: #ffffff;
+  --surface-2: #f4f4f0;
+  --surface-3: #e9e9e3;
+
+  --red: #c62828;
+  --orange: #d2691e;
+  --amber: #b07800;
+  --green: #1b7a1b;
+
+  --radius: 10px;
+  --tap: 48px;
+  --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--surface-2);
+  overscroll-behavior-y: none;
+}
+
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  background: var(--surface);
+}
+
+/* --- Header ------------------------------------------------------------- */
+
+.topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--brand); color: #fff;
+  padding-top: max(10px, env(safe-area-inset-top));
+}
+.topbar h1 { font-size: 16px; margin: 0; font-weight: 650; }
+.topbar .sub { font-size: 12px; opacity: 0.86; }
+
+.conn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.conn.offline { background: #7a1c1c; }
+
+/* --- Body --------------------------------------------------------------- */
+
+.body { flex: 1; overflow-y: auto; padding: 14px 14px 20px; -webkit-overflow-scrolling: touch; }
+
+.step-head { margin-bottom: 14px; }
+.step-num { font-size: 12px; font-weight: 700; color: var(--brand); letter-spacing: 0.08em; text-transform: uppercase; }
+.step-title { font-size: 21px; font-weight: 650; margin: 2px 0 0; }
+.step-hint { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+.progress { display: flex; gap: 4px; margin-top: 10px; }
+.progress i { flex: 1; height: 4px; border-radius: 2px; background: var(--surface-3); }
+.progress i.done { background: var(--brand); }
+
+/* --- Form fields -------------------------------------------------------- */
+
+.q { margin-bottom: 22px; }
+.q > label, .q-label {
+  display: block; font-size: 15px; font-weight: 650; margin-bottom: 7px;
+}
+.q .help { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+
+.text-input {
+  width: 100%; min-height: var(--tap);
+  padding: 11px 13px; border: 2px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); font-size: 17px;
+}
+.text-input:focus { border-color: var(--brand); }
+.text-input.invalid { border-color: var(--red); }
+.text-input.upper { text-transform: uppercase; }
+
+.error-text { color: var(--red); font-size: 13px; font-weight: 600; margin-top: 6px; }
+
+/* Segmented single-choice — always visible, never a dropdown, because a
+   dropdown hides the options and costs an extra tap in the field. */
+.seg { display: flex; gap: 8px; flex-wrap: wrap; }
+.seg button {
+  flex: 1 1 90px; min-height: var(--tap);
+  padding: 10px 12px; border-radius: var(--radius);
+  border: 2px solid var(--line); background: var(--surface);
+  font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.seg button[aria-pressed='true'] { border-color: var(--brand); background: #e8f1fb; color: var(--brand-dark); }
+
+/* Multi-select list of symptoms */
+.checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 420px) { .checks { grid-template-columns: 1fr; } }
+
+.check {
+  display: flex; align-items: center; gap: 9px; min-height: var(--tap);
+  padding: 9px 11px; border: 2px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); font-size: 15px; text-align: left; cursor: pointer; font-weight: 500;
+}
+.check[aria-pressed='true'] { border-color: var(--brand); background: #e8f1fb; }
+.check .box {
+  width: 22px; height: 22px; border: 2px solid var(--line); border-radius: 5px;
+  display: grid; place-items: center; flex: none; font-size: 14px; color: #fff;
+}
+.check[aria-pressed='true'] .box { background: var(--brand); border-color: var(--brand); }
+.check .local { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+
+/* Three-part number groups: age, stay duration, onset */
+.triple { display: flex; gap: 10px; width: 100%; }
+/* min-width:0 lets a part shrink below the intrinsic width of the number
+   input inside it; without it the row overflows the screen on a phone. */
+.triple .part { flex: 1 1 0; min-width: 0; }
+.triple .part label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+
+.stepper { display: flex; align-items: stretch; border: 2px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.stepper button { flex: none; width: 42px; border: none; background: var(--surface-2); font-size: 22px; font-weight: 600; cursor: pointer; }
+.stepper button:active { background: var(--surface-3); }
+.stepper input {
+  flex: 1 1 0; width: 100%; min-width: 0; border: none; text-align: center;
+  font-size: 19px; font-variant-numeric: tabular-nums; padding: 10px 2px;
+}
+
+/* On-screen keypad, per the form spec's "auto popup of on screen keyboard" */
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.keypad button {
+  min-height: 54px; border: 2px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); font-size: 21px; font-weight: 600; cursor: pointer;
+}
+.keypad button:active { background: var(--surface-3); }
+.keypad button.wide { grid-column: span 1; font-size: 16px; }
+
+.digits {
+  display: flex; gap: 5px; justify-content: center; margin: 6px 0;
+  font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: 0.06em; font-weight: 600;
+}
+.digits .slot {
+  width: 26px; text-align: center; border-bottom: 3px solid var(--line);
+}
+.digits .slot.filled { border-bottom-color: var(--brand); }
+
+/* --- Address picker ----------------------------------------------------- */
+
+.crumbs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.crumb {
+  padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface-2); font-size: 13px; cursor: pointer;
+}
+.crumb.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+
+.pick-list { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+.pick {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: var(--tap); padding: 10px 12px;
+  border: 2px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); text-align: left; font-size: 15px; cursor: pointer;
+}
+.pick[aria-pressed='true'] { border-color: var(--brand); background: #e8f1fb; }
+.pick .lvl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* --- Cards, lists, pills ------------------------------------------------ */
+
+.card { border: 1px solid var(--line); border-radius: var(--radius); padding: 13px; background: var(--surface); margin-bottom: 12px; }
+.card h3 { margin: 0 0 8px; font-size: 15px; }
+
+.rows { display: flex; flex-direction: column; gap: 8px; }
+.rowline { display: flex; justify-content: space-between; gap: 10px; font-size: 14.5px; padding: 3px 0; }
+.rowline .k { color: var(--muted); }
+.rowline .v { font-weight: 600; text-align: right; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  border: 1.5px solid currentColor;
+}
+.pill.red { color: var(--red); background: #fdecec; }
+.pill.orange { color: var(--orange); background: #fdf1e8; }
+.pill.amber { color: var(--amber); background: #fbf3df; }
+.pill.green { color: var(--green); background: #eaf6ea; }
+.pill.grey { color: var(--muted); background: var(--surface-2); }
+
+.queue-item {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  padding: 12px; border: 2px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); text-align: left; cursor: pointer; margin-bottom: 8px;
+}
+.queue-item .token { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.queue-item .who { font-size: 16px; font-weight: 650; }
+
+.banner {
+  padding: 10px 12px; border-radius: var(--radius); font-size: 14px;
+  border: 2px solid var(--line); background: var(--surface-2); margin-bottom: 12px;
+}
+.banner.warn { border-color: var(--amber); background: #fbf3df; }
+.banner.err { border-color: var(--red); background: #fdecec; }
+.banner.ok { border-color: var(--green); background: #eaf6ea; }
+
+.suggest { border-left: 4px solid var(--brand); background: #eef4fb; padding: 10px 12px; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+.suggest h4 { margin: 0 0 4px; font-size: 13px; color: var(--brand-dark); }
+.suggest p { margin: 0; font-size: 13.5px; }
+
+/* --- Buttons and the persistent bottom bar ------------------------------ */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: var(--tap); padding: 11px 16px; border-radius: var(--radius);
+  border: 2px solid var(--line); background: var(--surface);
+  font-size: 15px; font-weight: 650; cursor: pointer;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn.danger { background: var(--red); border-color: var(--red); color: #fff; }
+.btn.block { width: 100%; }
+.btn.small { min-height: 38px; padding: 7px 12px; font-size: 14px; }
+
+.actions { display: flex; gap: 10px; margin-top: 18px; }
+.actions .btn { flex: 1; }
+
+/* The four buttons the spec puts at the bottom of every data-entry screen. */
+.bottombar {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line); background: var(--surface);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottombar button {
+  min-height: 58px; border: none; background: none; cursor: pointer;
+  font-size: 12px; font-weight: 650; color: var(--ink-2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border-right: 1px solid var(--line);
+}
+.bottombar button:last-child { border-right: none; }
+.bottombar button:disabled { opacity: 0.4; }
+.bottombar button .glyph { font-size: 17px; line-height: 1; }
+.bottombar button.accent { color: var(--brand); }
+.bottombar .badge {
+  position: absolute; transform: translate(22px, -14px);
+  background: var(--red); color: #fff; border-radius: 999px;
+  font-size: 10px; padding: 1px 5px; font-weight: 700;
+}
+
+/* --- Login -------------------------------------------------------------- */
+
+.login { padding: 28px 20px; display: flex; flex-direction: column; justify-content: center; height: 100%; }
+.login h1 { font-size: 23px; margin: 0 0 4px; }
+.login p.lead { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+
+.empty { text-align: center; color: var(--muted); padding: 34px 16px; font-size: 14.5px; }
+.mono { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
