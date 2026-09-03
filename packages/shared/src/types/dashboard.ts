@@ -97,7 +97,9 @@ export interface DashboardSnapshot {
   camps: CampStatus[];
   signals: SyndromeSignal[];
   clusters: ScanCluster[];
-  stock: StockProjection[];
+  /** Stock projections carry the camp they belong to, since the dashboard
+   *  spans every camp in scope rather than one. */
+  stock: Array<StockProjection & { campId: string; campName: string }>;
 }
 
 export const ALERT_TYPES = [
@@ -124,9 +126,13 @@ export interface AlertDto {
   /** Machine-readable evidence: detector statistics, cluster geometry, stock rows. */
   evidence: unknown;
   campId: string | null;
+  /** Resolved for display so the alert list needs no second lookup. */
+  campName: string | null;
   districtId: string | null;
+  districtName: string | null;
   eventId: string | null;
   createdAt: string;
+  updatedAt: string;
   acknowledgedAt: string | null;
   acknowledgedByName: string | null;
 }

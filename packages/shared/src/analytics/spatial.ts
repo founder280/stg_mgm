@@ -132,6 +132,9 @@ export interface ScanArea {
 export interface ScanCluster {
   centreId: string;
   centreName: string;
+  /** Coordinates of the centre area, so a map can draw the window directly. */
+  centreLatitude: number;
+  centreLongitude: number;
   areaIds: string[];
   radiusKm: number;
   observed: number;
@@ -195,6 +198,8 @@ export function scanClusters(
         best = {
           centreId: centre.id,
           centreName: centre.name,
+          centreLatitude: centre.latitude,
+          centreLongitude: centre.longitude,
           areaIds: [...included],
           radiusKm: Math.round(distance * 100) / 100,
           observed,
