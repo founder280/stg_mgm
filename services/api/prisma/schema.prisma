@@ -1,0 +1,1044 @@
+// Mass Gathering Health Management System — data model.
+//
+// Conventions:
+//  * every operational row carries denormalised eventId / districtId / campId
+//    so the row-level scope filter is a single indexed WHERE, not a join walk;
+//  * clinical submissions carry their capture metadata verbatim (form version,
+//    device, instance id, timings) because the record is a legal document;
+//  * `instanceId` from the device is unique, which makes every offline sync
+//    push idempotent.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity, roles and scope
+// ---------------------------------------------------------------------------
+
+enum ScopeLevel {
+  STATE
+  REGION
+  DEPARTMENT
+  DISTRICT
+  FACILITY
+  CAMP
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+
+  @@map("departments")
+}
+
+model Permission {
+  id          String  @id @default(uuid())
+  code        String  @unique
+  module      String
+  description String?
+
+  roles RolePermission[]
+
+  @@index([module])
+  @@map("permissions")
+}
+
+model Role {
+  id          String     @id @default(uuid())
+  code        String     @unique
+  name        String
+  description String?
+  scopeLevel  ScopeLevel
+  isSystem    Boolean    @default(false)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  permissions RolePermission[]
+  users       User[]
+
+  @@map("roles")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  username      String    @unique
+  fullName      String
+  email         String?   @unique
+  mobile        String?
+  passwordHash  String
+  designation   String?
+  roleId        String
+  departmentId  String?
+  isActive      Boolean   @default(true)
+  mustChangePassword Boolean @default(false)
+  lastLoginAt   DateTime?
+  failedLogins  Int       @default(0)
+  lockedUntil   DateTime?
+  createdById   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  role        Role             @relation(fields: [roleId], references: [id])
+  department  Department?      @relation(fields: [departmentId], references: [id])
+  createdBy   User?            @relation("UserCreatedBy", fields: [createdById], references: [id])
+  createdUsers User[]          @relation("UserCreatedBy")
+  assignments UserAssignment[]
+  refreshTokens RefreshToken[]
+  rosterEntries RosterEntry[]
+  campsInCharge Camp[]           @relation("CampIncharge")
+  registeredWalkIns WalkIn[]     @relation("WalkInRegisteredBy")
+  vitalsRecorded    Vitals[]
+  clinicalRecords   ClinicalRecord[]
+  acknowledgedAlerts Alert[]
+  auditLogs   AuditLog[]
+  attendanceMarked Attendance[]  @relation("AttendanceMarkedBy")
+
+  @@index([roleId])
+  @@index([departmentId])
+  @@map("users")
+}
+
+/// A user may hold several assignments (e.g. two districts); visibility is the
+/// union of the subtrees they point at.
+model UserAssignment {
+  id        String     @id @default(uuid())
+  userId    String
+  scopeType ScopeLevel
+  scopeId   String
+  createdAt DateTime   @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scopeType, scopeId])
+  @@index([scopeType, scopeId])
+  @@map("user_assignments")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  deviceId  String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  summary    String?
+  before     Json?
+  after      Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId, createdAt])
+  @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Address hierarchy
+// ---------------------------------------------------------------------------
+
+enum AddressHierarchy {
+  ADMIN
+  REVENUE
+  HEALTH
+}
+
+enum AddressLevel {
+  COUNTRY
+  STATE
+  REGION
+  DISTRICT
+  TALUK
+  PANCHAYAT
+  HUD
+  BLOCK
+  PHC
+  HSC
+  VILLAGE
+  HAMLET
+}
+
+/// One self-referencing tree carrying all three hierarchies. `path` stores the
+/// materialised ancestor chain so a subtree query needs no recursive CTE.
+model AddressUnit {
+  id         String           @id @default(uuid())
+  code       String
+  name       String
+  nameLocal  String?
+  level      AddressLevel
+  hierarchy  AddressHierarchy @default(ADMIN)
+  parentId   String?
+  path       String           @default("")
+  depth      Int              @default(0)
+  lgdCode    String?
+  latitude   Float?
+  longitude  Float?
+  population Int?
+  boundary   Json?
+  isActive   Boolean          @default(true)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  parent   AddressUnit?  @relation("AddressTree", fields: [parentId], references: [id])
+  children AddressUnit[] @relation("AddressTree")
+
+  facilities        Facility[]
+  campsInDistrict   Camp[]         @relation("CampDistrict")
+  eventDistricts    EventDistrict[]
+  residentWalkIns   WalkIn[]       @relation("WalkInResidence")
+  onsetWalkIns      WalkIn[]       @relation("WalkInOnsetAddress")
+  districtWalkIns   WalkIn[]       @relation("WalkInDistrict")
+  facilityDistrict  Facility[]     @relation("FacilityDistrict")
+  alerts            Alert[]
+
+  @@unique([hierarchy, code])
+  @@index([parentId])
+  @@index([level, hierarchy])
+  @@index([path])
+  @@map("address_units")
+}
+
+// ---------------------------------------------------------------------------
+// Facilities
+// ---------------------------------------------------------------------------
+
+enum FacilityType {
+  CAMP_SITE
+  PHC
+  CHC
+  DISTRICT_HOSPITAL
+  MEDICAL_COLLEGE
+  EMPANELLED_HOSPITAL
+  LABORATORY
+  DRUG_WAREHOUSE
+  AMBULANCE_BASE
+  CONTROL_ROOM
+}
+
+model Facility {
+  id            String       @id @default(uuid())
+  code          String       @unique
+  name          String
+  type          FacilityType
+  addressUnitId String?
+  districtId    String?
+  latitude      Float?
+  longitude     Float?
+  specialities  String[]     @default([])
+  bedCapacity   Int?
+  contactName   String?
+  contactPhone  String?
+  isEmpanelled  Boolean      @default(false)
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  addressUnit AddressUnit? @relation(fields: [addressUnitId], references: [id])
+  district    AddressUnit? @relation("FacilityDistrict", fields: [districtId], references: [id])
+  camps       Camp[]
+  labOrders   LabOrder[]
+  referrals   Referral[]
+
+  @@index([type])
+  @@index([districtId])
+  @@map("facilities")
+}
+
+// ---------------------------------------------------------------------------
+// Events (the gathering itself), zones and camps
+// ---------------------------------------------------------------------------
+
+model Event {
+  id                String    @id @default(uuid())
+  code              String    @unique
+  name              String
+  description       String?
+  startDate         DateTime
+  endDate           DateTime
+  expectedFootfall  Int?
+  /// Reference date for "days stayed at the festival area before xx.xx.xxxx".
+  stayReferenceDate DateTime?
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  districts EventDistrict[]
+  zones     EventZone[]
+  camps     Camp[]
+  walkIns   WalkIn[]
+  alerts    Alert[]
+
+  @@map("events")
+}
+
+model EventDistrict {
+  eventId    String
+  districtId String
+
+  event    Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  district AddressUnit @relation(fields: [districtId], references: [id])
+
+  @@id([eventId, districtId])
+  @@map("event_districts")
+}
+
+/// Main and sub divisions of the festival area, used by the map interface on
+/// screen 5 (place of onset) and by the spatial cluster scan.
+model EventZone {
+  id               String   @id @default(uuid())
+  eventId          String
+  code             String
+  name             String
+  parentId         String?
+  latitude         Float?
+  longitude        Float?
+  expectedFootfall Int?
+  boundary         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  event    Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  parent   EventZone?  @relation("ZoneTree", fields: [parentId], references: [id])
+  children EventZone[] @relation("ZoneTree")
+  camps    Camp[]
+  walkIns  WalkIn[]    @relation("WalkInOnsetZone")
+
+  @@unique([eventId, code])
+  @@index([parentId])
+  @@map("event_zones")
+}
+
+enum CampType {
+  MEDICAL_CAMP
+  FIRST_AID_POST
+  AMBULANCE_POINT
+  MOBILE_UNIT
+}
+
+model Camp {
+  id             String   @id @default(uuid())
+  eventId        String
+  code           String
+  name           String
+  type           CampType @default(MEDICAL_CAMP)
+  facilityId     String?
+  zoneId         String?
+  districtId     String
+  latitude       Float?
+  longitude      Float?
+  inchargeUserId String?
+  opensAt        DateTime?
+  closesAt       DateTime?
+  /// Symptom codes offered by this camp's form ("list may be edited per festival").
+  symptomCodes   String[] @default([])
+  lastSyncAt     DateTime?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  event      Event        @relation(fields: [eventId], references: [id])
+  facility   Facility?    @relation(fields: [facilityId], references: [id])
+  zone       EventZone?   @relation(fields: [zoneId], references: [id])
+  district   AddressUnit  @relation("CampDistrict", fields: [districtId], references: [id])
+  incharge   User?        @relation("CampIncharge", fields: [inchargeUserId], references: [id])
+
+  rosterEntries RosterEntry[]
+  readiness     CampReadiness[]
+  inventory     CampInventory[]
+  stockTxns     StockTransaction[]
+  walkIns       WalkIn[]
+  syncBatches   SyncBatch[]
+  alerts        Alert[]
+
+  @@unique([eventId, code])
+  @@index([districtId])
+  @@index([zoneId])
+  @@map("camps")
+}
+
+// ---------------------------------------------------------------------------
+// Duty roster and attendance (pre-camp item a)
+// ---------------------------------------------------------------------------
+
+enum ShiftCode {
+  MORNING
+  EVENING
+  NIGHT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  ON_LEAVE
+}
+
+model RosterEntry {
+  id        String    @id @default(uuid())
+  campId    String
+  userId    String
+  dutyDate  DateTime  @db.Date
+  shift     ShiftCode
+  role      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  camp       Camp        @relation(fields: [campId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id])
+  attendance Attendance?
+
+  @@unique([campId, userId, dutyDate, shift])
+  @@index([campId, dutyDate])
+  @@map("roster_entries")
+}
+
+model Attendance {
+  id            String           @id @default(uuid())
+  rosterEntryId String           @unique
+  status        AttendanceStatus
+  markedAt      DateTime         @default(now())
+  markedById    String?
+  latitude      Float?
+  longitude     Float?
+  remarks       String?
+
+  rosterEntry RosterEntry @relation(fields: [rosterEntryId], references: [id], onDelete: Cascade)
+  markedBy    User?       @relation("AttendanceMarkedBy", fields: [markedById], references: [id])
+
+  @@map("attendance")
+}
+
+// ---------------------------------------------------------------------------
+// Camp readiness (pre-camp item b): venue, equipment, feedback, photographs
+// ---------------------------------------------------------------------------
+
+enum EquipmentStatus {
+  FUNCTIONAL
+  NOT_FUNCTIONAL
+  NOT_AVAILABLE
+}
+
+model CampReadiness {
+  id                 String   @id @default(uuid())
+  campId             String
+  reportDate         DateTime @db.Date
+  venueReady         Boolean  @default(false)
+  venueRemarks       String?
+  waterAvailable     Boolean  @default(false)
+  powerAvailable     Boolean  @default(false)
+  wasteDisposalReady Boolean  @default(false)
+  feedback           String?
+  reportedById       String?
+  readinessPercent   Float?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  camp      Camp                    @relation(fields: [campId], references: [id], onDelete: Cascade)
+  equipment ReadinessEquipment[]
+  photos    CampPhoto[]
+
+  @@unique([campId, reportDate])
+  @@map("camp_readiness")
+}
+
+model ReadinessEquipment {
+  id            String          @id @default(uuid())
+  readinessId   String
+  equipmentCode String
+  status        EquipmentStatus
+  quantity      Int             @default(0)
+  remarks       String?
+
+  readiness CampReadiness @relation(fields: [readinessId], references: [id], onDelete: Cascade)
+
+  @@unique([readinessId, equipmentCode])
+  @@map("readiness_equipment")
+}
+
+model CampPhoto {
+  id          String   @id @default(uuid())
+  readinessId String
+  kind        String
+  url         String
+  capturedAt  DateTime?
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+
+  readiness CampReadiness @relation(fields: [readinessId], references: [id], onDelete: Cascade)
+
+  @@map("camp_photos")
+}
+
+// ---------------------------------------------------------------------------
+// Drug master, camp inventory and stock ledger
+// ---------------------------------------------------------------------------
+
+enum DrugForm {
+  TABLET
+  SYRUP
+  SACHET
+  IVF
+  INJECTION
+  OINTMENT
+}
+
+model Drug {
+  id           String   @id @default(uuid())
+  code         String   @unique
+  name         String
+  genericName  String
+  form         DrugForm
+  strength     String?
+  emergencyTray Boolean @default(false)
+  reorderLevel Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  inventory        CampInventory[]
+  stockTxns        StockTransaction[]
+  prescriptionLines PrescriptionLine[]
+
+  @@map("drugs")
+}
+
+model CampInventory {
+  id           String    @id @default(uuid())
+  campId       String
+  drugId       String
+  onHand       Int       @default(0)
+  batchNumber  String?
+  expiryDate   DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  camp Camp @relation(fields: [campId], references: [id], onDelete: Cascade)
+  drug Drug @relation(fields: [drugId], references: [id])
+
+  @@unique([campId, drugId])
+  @@index([campId])
+  @@map("camp_inventory")
+}
+
+enum StockTxnType {
+  RECEIPT
+  ISSUE
+  RETURN
+  ADJUSTMENT
+  EXPIRY
+}
+
+model StockTransaction {
+  id          String       @id @default(uuid())
+  campId      String
+  drugId      String
+  type        StockTxnType
+  /// Signed: positive adds to stock, negative removes.
+  quantity    Int
+  balanceAfter Int
+  batchNumber String?
+  expiryDate  DateTime?
+  reference   String?
+  remarks     String?
+  createdById String?
+  createdAt   DateTime     @default(now())
+
+  camp Camp @relation(fields: [campId], references: [id], onDelete: Cascade)
+  drug Drug @relation(fields: [drugId], references: [id])
+
+  @@index([campId, drugId, createdAt])
+  @@map("stock_transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Clinical masters
+// ---------------------------------------------------------------------------
+
+model Symptom {
+  id           String  @id @default(uuid())
+  code         String  @unique
+  name         String
+  nameLocal    String?
+  group        String
+  subFormat    String?
+  redFlag      Boolean @default(false)
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+
+  walkInSymptoms WalkInSymptom[]
+
+  @@map("symptoms")
+}
+
+/// Case definitions are stored so they can be versioned and edited from the
+/// admin console; `rule` holds the declarative rule tree evaluated by
+/// @mgms/shared's classifier.
+model SyndromeDefinition {
+  id             String   @id @default(uuid())
+  code           String   @unique
+  name           String
+  caseDefinition String
+  reference      String
+  priority       Int      @default(0)
+  notifiable     Boolean  @default(false)
+  rule           Json
+  version        Int      @default(1)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  walkInSyndromes WalkInSyndrome[]
+
+  @@map("syndrome_definitions")
+}
+
+// ---------------------------------------------------------------------------
+// Walk-in record — the field form
+// ---------------------------------------------------------------------------
+
+enum Gender {
+  MALE
+  FEMALE
+  TRANSGENDER
+}
+
+enum ResidenceType {
+  HOME_STATE
+  OTHER_STATE
+  FOREIGNER
+}
+
+enum OnsetPlace {
+  HOME
+  FESTIVAL_AREA
+  ENROUTE
+}
+
+enum WalkInStage {
+  REGISTERED
+  VITALS_DONE
+  CLINICAL_DONE
+  DISPENSED
+  REFERRED
+  CLOSED
+}
+
+enum TriageLevel {
+  GREEN
+  YELLOW
+  ORANGE
+  RED
+}
+
+model WalkIn {
+  id          String   @id @default(uuid())
+  /// Device-generated id from the capture metadata — the sync idempotency key.
+  instanceId  String   @unique
+  tokenNumber String
+  campId      String
+  eventId     String
+  districtId  String
+
+  name        String
+  ageYears    Int      @default(0)
+  ageMonths   Int      @default(0)
+  ageDays     Int      @default(0)
+  /// Total age in months, denormalised for age-band aggregation.
+  ageTotalMonths Float
+  ageBand     String
+  gender      Gender
+
+  residenceType     ResidenceType
+  residenceUnitId   String?
+  residenceText     String?
+  countryCode       String?
+  daysAtResidence   Int?
+
+  mobile      String?
+
+  stayYears   Int @default(0)
+  stayMonths  Int @default(0)
+  stayDays    Int @default(0)
+  /// Total festival-area stay in days; identifies temporary residents.
+  stayTotalDays Int @default(0)
+
+  caseCategories String[] @default([])
+  otherSymptomText String?
+
+  onsetPlace       OnsetPlace
+  onsetZoneId      String?
+  onsetAddressUnitId String?
+
+  latitude    Float?
+  longitude   Float?
+  locationAccuracyM Float?
+
+  stage       WalkInStage @default(REGISTERED)
+  triageLevel TriageLevel @default(GREEN)
+  triageScore Int         @default(0)
+  triageReasons String[]  @default([])
+  primarySyndromeCode String?
+
+  registeredById String?
+  registeredAt   DateTime @default(now())
+  closedAt       DateTime?
+
+  // Auto-captured provenance (page 1 of the form spec).
+  formName        String
+  formVersion     String
+  deviceId        String
+  captureUsername String
+  loginTime       DateTime
+  recordStartTime DateTime
+  recordEndTime   DateTime
+  receivedTime    DateTime @default(now())
+  submittedIp     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  camp          Camp          @relation(fields: [campId], references: [id])
+  event         Event         @relation(fields: [eventId], references: [id])
+  district      AddressUnit   @relation("WalkInDistrict", fields: [districtId], references: [id])
+  residenceUnit AddressUnit?  @relation("WalkInResidence", fields: [residenceUnitId], references: [id])
+  onsetZone     EventZone?    @relation("WalkInOnsetZone", fields: [onsetZoneId], references: [id])
+  onsetAddress  AddressUnit?  @relation("WalkInOnsetAddress", fields: [onsetAddressUnitId], references: [id])
+  registeredBy  User?         @relation("WalkInRegisteredBy", fields: [registeredById], references: [id])
+
+  symptoms  WalkInSymptom[]
+  injuries  InjuryDetail[]
+  bites     BiteDetail[]
+  syndromes WalkInSyndrome[]
+  vitals    Vitals?
+  clinical  ClinicalRecord?
+  labOrder  LabOrder?
+  prescriptionLines PrescriptionLine[]
+  referral  Referral?
+
+  @@unique([campId, tokenNumber])
+  @@index([campId, stage])
+  @@index([eventId, registeredAt])
+  @@index([districtId, registeredAt])
+  @@index([primarySyndromeCode, registeredAt])
+  @@index([triageLevel, stage])
+  @@map("walk_ins")
+}
+
+model WalkInSymptom {
+  id         String @id @default(uuid())
+  walkInId   String
+  symptomId  String
+  symptomCode String
+  onsetDays  Int    @default(1)
+  onsetHours Int    @default(0)
+  /// Denormalised total onset in hours, used by the syndrome rule engine.
+  onsetTotalHours Int @default(24)
+  note       String?
+
+  walkIn  WalkIn  @relation(fields: [walkInId], references: [id], onDelete: Cascade)
+  symptom Symptom @relation(fields: [symptomId], references: [id])
+
+  @@unique([walkInId, symptomId])
+  @@index([symptomCode])
+  @@map("walk_in_symptoms")
+}
+
+enum InjuryType {
+  ABRASION
+  LACERATION
+  FRACTURE
+}
+
+model InjuryDetail {
+  id         String     @id @default(uuid())
+  walkInId   String
+  injuryType InjuryType
+  bodySite   String?
+  lengthCm   Float?
+  markerX    Float?
+  markerY    Float?
+  note       String?
+
+  walkIn WalkIn @relation(fields: [walkInId], references: [id], onDelete: Cascade)
+
+  @@index([walkInId])
+  @@map("injury_details")
+}
+
+enum BiteType {
+  SNAKE
+  SCORPION
+  RABID_ANIMAL
+  INSECT
+  OTHER_ANIMAL
+  UNKNOWN
+}
+
+model BiteDetail {
+  id       String   @id @default(uuid())
+  walkInId String
+  biteType BiteType
+  bodySite String?
+  note     String?
+
+  walkIn WalkIn @relation(fields: [walkInId], references: [id], onDelete: Cascade)
+
+  @@index([walkInId])
+  @@map("bite_details")
+}
+
+model WalkInSyndrome {
+  id           String  @id @default(uuid())
+  walkInId     String
+  syndromeId   String
+  syndromeCode String
+  isPrimary    Boolean @default(false)
+  reference    String
+
+  walkIn   WalkIn             @relation(fields: [walkInId], references: [id], onDelete: Cascade)
+  syndrome SyndromeDefinition @relation(fields: [syndromeId], references: [id])
+
+  @@unique([walkInId, syndromeId])
+  @@index([syndromeCode])
+  @@map("walk_in_syndromes")
+}
+
+model Vitals {
+  id           String   @id @default(uuid())
+  walkInId     String   @unique
+  weightKg     Float?
+  heightCm     Float?
+  bmi          Float?
+  bmiCategory  String?
+  systolic     Int?
+  diastolic    Int?
+  bpStage      String?
+  newlyDetectedHypertension Boolean @default(false)
+  pulse        Int?
+  temperatureF Float?
+  recordedById String?
+  recordedAt   DateTime @default(now())
+
+  // Capture metadata for this leg of the split form.
+  deviceId        String?
+  instanceId      String?  @unique
+  recordStartTime DateTime?
+  recordEndTime   DateTime?
+
+  walkIn     WalkIn @relation(fields: [walkInId], references: [id], onDelete: Cascade)
+  recordedBy User?  @relation(fields: [recordedById], references: [id])
+
+  @@map("vitals")
+}
+
+model ClinicalRecord {
+  id                   String   @id @default(uuid())
+  walkInId             String   @unique
+  provisionalDiagnosis String?
+  dressingPerformed    Boolean  @default(false)
+  dressingNotes        String?
+  reviewAdvisedOn      DateTime?
+  advice               String?
+  medicalOfficerId     String?
+  recordedAt           DateTime @default(now())
+
+  deviceId        String?
+  instanceId      String?  @unique
+  recordStartTime DateTime?
+  recordEndTime   DateTime?
+
+  walkIn         WalkIn @relation(fields: [walkInId], references: [id], onDelete: Cascade)
+  medicalOfficer User?  @relation(fields: [medicalOfficerId], references: [id])
+
+  @@map("clinical_records")
+}
+
+enum LabOrderStatus {
+  NOT_ADVISED
+  ADVISED_REFERRED
+  SAMPLE_COLLECTED
+}
+
+model LabOrder {
+  id            String         @id @default(uuid())
+  walkInId      String         @unique
+  status        LabOrderStatus @default(NOT_ADVISED)
+  samples       String[]       @default([])
+  labFacilityId String?
+  /// Label affixed at the camp site; the transport manifest is keyed on it.
+  labelId       String?
+  transported   Boolean        @default(false)
+  note          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  walkIn      WalkIn    @relation(fields: [walkInId], references: [id], onDelete: Cascade)
+  labFacility Facility? @relation(fields: [labFacilityId], references: [id])
+
+  @@index([status])
+  @@map("lab_orders")
+}
+
+model PrescriptionLine {
+  id            String   @id @default(uuid())
+  walkInId      String
+  lineNo        Int
+  form          DrugForm
+  drugId        String?
+  drugName      String
+  dosagePattern String
+  days          Int      @default(3)
+  quantity      Int
+  dispensed     Boolean  @default(false)
+  dispensedAt   DateTime?
+  note          String?
+
+  walkIn WalkIn @relation(fields: [walkInId], references: [id], onDelete: Cascade)
+  drug   Drug?  @relation(fields: [drugId], references: [id])
+
+  @@unique([walkInId, lineNo])
+  @@index([drugId])
+  @@map("prescription_lines")
+}
+
+enum ReferralStatus {
+  REQUESTED
+  AMBULANCE_DISPATCHED
+  IN_TRANSIT
+  ARRIVED
+  ADMITTED
+  CANCELLED
+}
+
+model Referral {
+  id                 String         @id @default(uuid())
+  walkInId           String         @unique
+  facilityId         String?
+  speciality         String?
+  ambulanceRequested Boolean        @default(false)
+  ambulanceRef       String?
+  status             ReferralStatus @default(REQUESTED)
+  reason             String?
+  requestedAt        DateTime       @default(now())
+  dispatchedAt       DateTime?
+  arrivedAt          DateTime?
+  updatedAt          DateTime       @updatedAt
+
+  walkIn   WalkIn    @relation(fields: [walkInId], references: [id], onDelete: Cascade)
+  facility Facility? @relation(fields: [facilityId], references: [id])
+
+  @@index([status])
+  @@map("referrals")
+}
+
+// ---------------------------------------------------------------------------
+// Offline sync
+// ---------------------------------------------------------------------------
+
+model SyncBatch {
+  id         String   @id @default(uuid())
+  campId     String?
+  deviceId   String
+  userId     String?
+  appVersion String?
+  operationCount Int  @default(0)
+  applied    Int      @default(0)
+  duplicates Int      @default(0)
+  rejected   Int      @default(0)
+  receivedAt DateTime @default(now())
+  ipAddress  String?
+
+  camp Camp? @relation(fields: [campId], references: [id])
+
+  @@index([deviceId, receivedAt])
+  @@map("sync_batches")
+}
+
+// ---------------------------------------------------------------------------
+// Surveillance alerts
+// ---------------------------------------------------------------------------
+
+enum AlertType {
+  ABERRATION
+  SPATIAL_CLUSTER
+  CRITICAL_CASE
+  STOCKOUT
+  CAMP_NOT_READY
+  SYNC_STALE
+  REFERRAL_DELAY
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model Alert {
+  id         String        @id @default(uuid())
+  type       AlertType
+  severity   AlertSeverity
+  title      String
+  body       String
+  evidence   Json?
+  /// Stable key for an alert's subject, so a recurring condition updates the
+  /// existing row instead of spamming a new one every analytics run.
+  dedupeKey  String        @unique
+  eventId    String?
+  campId     String?
+  districtId String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  acknowledgedAt   DateTime?
+  acknowledgedById String?
+
+  event          Event?       @relation(fields: [eventId], references: [id])
+  camp           Camp?        @relation(fields: [campId], references: [id])
+  district       AddressUnit? @relation(fields: [districtId], references: [id])
+  acknowledgedBy User?        @relation(fields: [acknowledgedById], references: [id])
+
+  @@index([severity, acknowledgedAt])
+  @@index([eventId, createdAt])
+  @@map("alerts")
+}

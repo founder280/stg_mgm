@@ -1,0 +1,29 @@
+{
+  "name": "stg-mgm",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Mass Gathering Health Management System (MGMS)",
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "apps/*"
+  ],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "npm run build -w @mgms/shared && npm run build -w @mgms/api && npm run build -w @mgms/web && npm run build -w @mgms/mobile",
+    "dev": "npm run dev -w @mgms/api & npm run dev -w @mgms/web & npm run dev -w @mgms/mobile",
+    "dev:api": "npm run dev -w @mgms/api",
+    "dev:web": "npm run dev -w @mgms/web",
+    "dev:mobile": "npm run dev -w @mgms/mobile",
+    "test": "npm run test -w @mgms/shared && npm run test -w @mgms/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run typecheck",
+    "db:migrate": "npm run db:migrate -w @mgms/api",
+    "db:seed": "npm run db:seed -w @mgms/api",
+    "db:reset": "npm run db:reset -w @mgms/api"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}
