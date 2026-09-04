@@ -57,7 +57,7 @@ const readLocalState = () =>
           transaction.oncomplete = () =>
             resolve({
               walkIns: walkIns.result.map((w) => ({ name: w.name, stage: w.stage, synced: w.synced, token: w.tokenNumber })),
-              outbox: outbox.result.map((e) => ({ kind: e.kind, status: e.status })),
+              outbox: outbox.result.map((e) => ({ kind: e.kind, status: e.status, error: e.lastError ?? null })),
             });
         };
       }),
@@ -197,15 +197,40 @@ try {
   }
 
   // --- Reconnect ----------------------------------------------------------
+  // A link coming back is not the same as a link that works: the first request
+  // after a reconnect is routinely refused, which is precisely how records get
+  // stranded. Refuse it deliberately — the app has to recover on its own.
+  let pushAttempts = 0;
+  await context.route('**/api/sync/push', async (route) => {
+    pushAttempts += 1;
+    if (pushAttempts === 1) return route.abort('connectionfailed');
+    return route.continue();
+  });
+
   await context.setOffline(false);
   await page.evaluate(() => window.dispatchEvent(new Event('online')));
-  await page.waitForTimeout(6000);
 
-  const synced = await readLocalState();
+  // Poll rather than sleep a fixed span. The first request after a link comes
+  // back can legitimately fail, and the app is meant to retry with a backoff —
+  // so what is under test is that the queue drains, not that it drains on the
+  // first attempt within an arbitrary window.
+  let synced = await readLocalState();
+  for (const deadline = Date.now() + 40_000; Date.now() < deadline; ) {
+    if (synced.outbox.every((e) => e.status === 'SENT') && synced.walkIns.every((w) => w.synced)) break;
+    await page.waitForTimeout(1000);
+    synced = await readLocalState();
+  }
+  check(
+    'a refused push is retried without waiting for the heartbeat',
+    pushAttempts >= 2,
+    `${pushAttempts} attempt(s)`,
+  );
+
+  const rejections = synced.outbox.filter((e) => e.error).map((e) => `${e.kind}: ${e.error}`);
   check(
     'everything queued flushes on reconnect',
     synced.outbox.every((e) => e.status === 'SENT') && synced.walkIns.every((w) => w.synced),
-    JSON.stringify(synced.outbox.map((e) => e.status)),
+    [JSON.stringify(synced.outbox.map((e) => e.status)), ...rejections].join(' — '),
   );
   check(
     'the server allocates a token for each offline record',

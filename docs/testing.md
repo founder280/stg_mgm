@@ -126,8 +126,9 @@ that the seeded outbreak is detected.
 **`e2e/field-app-offline.mjs`** drives the field app in a mobile browser and
 pulls the network out mid-consultation: register online, go offline, record
 vitals, register a second patient with no connection, restart the app still
-offline, reconnect, and confirm every queued record flushes and receives a
-server token. This is the property the whole field design rests on.
+offline, reconnect — refusing the first push, as a real link often does — and
+confirm the app retries on its own until every queued record flushes and
+receives a server token. This is the property the whole field design rests on.
 
 Override any endpoint with `MGMS_API_URL`, `MGMS_WEB_URL`, `MGMS_FIELD_URL` or
 `MGMS_SEED_PASSWORD`.

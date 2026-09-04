@@ -6,6 +6,16 @@ import { allEntries, markEntry, pendingEntries, pruneSent, toSyncOperation, upda
 
 const DEVICE_KEY = 'mgms.camp.device';
 
+/**
+ * A returning connection is exactly when a sync is most likely to fail: the
+ * first request often goes out before the link is really usable again. The
+ * slow heartbeat below is the wrong thing to fall back on there — it would
+ * leave patient records sitting on the device for two minutes after the signal
+ * came back — so a failed pass is retried quickly and backs off from there.
+ */
+const RETRY_BASE_MS = 3_000;
+const RETRY_MAX_MS = 60_000;
+
 /** A stable per-device id, part of the capture metadata on every record. */
 function deviceId(): string {
   let id = localStorage.getItem(DEVICE_KEY);
@@ -51,6 +61,15 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   // Set when a sync is asked for while one is already running, so the request
   // is honoured after the current pass instead of being dropped.
   const syncRequested = useRef(false);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryDelay = useRef(0);
+
+  const cancelRetry = useCallback(() => {
+    if (retryTimer.current !== null) {
+      clearTimeout(retryTimer.current);
+      retryTimer.current = null;
+    }
+  }, []);
 
   const reloadCounts = useCallback(async () => {
     const entries = await allEntries();
@@ -119,6 +138,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       return;
     }
     syncInFlight.current = true;
+    cancelRetry();
     setSyncing(true);
     setSyncError(null);
 
@@ -182,6 +202,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       const now = new Date().toISOString();
       await idb.put(STORES.meta, now, 'lastSyncAt');
       setLastSyncAt(now);
+      retryDelay.current = 0;
     } catch (error) {
       setSyncError(
         error instanceof OfflineError
@@ -194,6 +215,12 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       for (const entry of await allEntries()) {
         if (entry.status === 'SENDING') await markEntry(entry.clientId, { status: 'PENDING' });
       }
+      retryDelay.current = Math.min(retryDelay.current ? retryDelay.current * 2 : RETRY_BASE_MS, RETRY_MAX_MS);
+      cancelRetry();
+      retryTimer.current = setTimeout(() => {
+        retryTimer.current = null;
+        if (navigator.onLine) void sync();
+      }, retryDelay.current);
     } finally {
       await reloadCounts();
       setSyncing(false);
@@ -207,7 +234,9 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     // `sync` refers to itself for the trailing re-run above; the ref guard
     // makes that safe and bounded — one extra pass, never a loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device, refreshBundle, reloadCounts]);
+  }, [cancelRetry, device, refreshBundle, reloadCounts]);
+
+  useEffect(() => cancelRetry, [cancelRetry]);
 
   // Sync when the connection returns and on a slow heartbeat while it holds.
   useEffect(() => {

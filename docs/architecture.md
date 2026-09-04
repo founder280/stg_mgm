@@ -54,7 +54,11 @@ field app therefore never treats the network as available:
 3. Idempotency is keyed on the device-generated `instanceId` from the form's own
    capture metadata. Replaying a batch after a dropped connection cannot create
    a duplicate patient.
-4. A rejected record stays on the device, visible, for a human to resolve.
+4. A flush that fails is retried on a short backoff — 3s, doubling to a minute —
+   rather than waiting for the two-minute heartbeat. The first request after a
+   signal returns is routinely refused, and that is exactly the moment records
+   must not be left stranded on the device.
+5. A rejected record stays on the device, visible, for a human to resolve.
    Silently dropping a patient record is never acceptable.
 
 The service worker precaches the app shell, and a reference bundle (masters, the
