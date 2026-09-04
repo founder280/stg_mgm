@@ -48,7 +48,10 @@ npm run test:api
 
 Point it elsewhere with `DATABASE_URL` if your database is not on
 `localhost:5432` — an externally supplied value always wins over
-`services/api/.env.test`.
+`services/api/.env.test`. Because it wins, the suite refuses to start unless
+the database names itself a test database (ending in `_test` or `_e2e`):
+truncation is unconditional, and a development `DATABASE_URL` left exported in
+a shell would otherwise take your seeded gathering with it.
 
 Covers, against a real database and a real HTTP surface:
 
@@ -143,7 +146,7 @@ With the stack running and seeded. Every account uses the seed password
 Sign in to the console at `:5173` as **`state.admin`**.
 
 - The **Surveillance signals** panel should name *Acute Diarrhoeal Disease* at
-  *Girivalam North Medical Camp*, roughly 30 observed against under 2 expected,
+  *Jatara North Medical Camp*, roughly 30 observed against under 2 expected,
   flagged by several detectors. That is the outbreak the seed plants, found
   rather than announced.
 - Open **Alerts** and press *Evidence* on that alert — each detector's
@@ -157,11 +160,11 @@ Sign in to the console at `:5173` as **`state.admin`**.
 
 ### Scope actually holds
 
-- Sign in as **`district.tvm`** — eight camps, all Tiruvannamalai.
-- Sign in as **`district.cud`** — none of them.
-- As `district.cud`, try a Tiruvannamalai camp id in the URL. Empty, not an
+- Sign in as **`district.mulugu`** — eight camps, all Mulugu.
+- Sign in as **`district.bhupalpally`** — none of them.
+- As `district.bhupalpally`, try a Mulugu camp id in the URL. Empty, not an
   error page and not the data.
-- Sign in as **`girin1.sup`** (supervisor): the dashboard is there, *Roles &
+- Sign in as **`jatn1.sup`** (supervisor): the dashboard is there, *Roles &
   permissions* is not in the navigation.
 - Open **Roles & permissions** as `state.admin` for the full matrix on one
   screen — ten roles by thirty-six permissions.
@@ -169,7 +172,7 @@ Sign in to the console at `:5173` as **`state.admin`**.
 ### The field app works with the network off
 
 Open the field app at `:5175` on a phone, or in desktop devtools with device
-emulation. Sign in as **`girin1.vol1`** (volunteer).
+emulation. Sign in as **`jatn1.vol1`** (volunteer).
 
 1. Register a walk-in. Try typing digits into the name — they will not appear.
    Use the on-screen keypad for the mobile number.
@@ -187,10 +190,10 @@ emulation. Sign in as **`girin1.vol1`** (volunteer).
 
 ### The split form is really split
 
-- As `girin1.vol1` (volunteer), you can register but the vitals screen refuses.
-- Sign in as `girin1.para` (paramedic) and open the same patient from
+- As `jatn1.vol1` (volunteer), you can register but the vitals screen refuses.
+- Sign in as `jatn1.para` (paramedic) and open the same patient from
   **Waiting** — vitals are available.
-- Sign in as `girin1.mo` (medical officer) — investigations and treatment.
+- Sign in as `jatn1.mo` (medical officer) — investigations and treatment.
 - The drug list offers only what that camp holds. Check the camp's stock in the
   console before and after dispensing.
 

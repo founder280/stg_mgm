@@ -90,7 +90,7 @@ authRouter.get(
     });
     if (!user) throw ApiError.notFound('User not found');
 
-    // Resolve assignment names so the client can show "Tiruvannamalai district".
+    // Resolve assignment names so the client can show "Mulugu district".
     const addressIds = user.assignments.filter((a) => a.scopeType !== 'CAMP').map((a) => a.scopeId);
     const campIds = user.assignments.filter((a) => a.scopeType === 'CAMP').map((a) => a.scopeId);
     const [units, camps] = await Promise.all([

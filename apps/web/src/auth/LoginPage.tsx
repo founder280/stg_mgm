@@ -76,12 +76,12 @@ export function LoginPage() {
               state.admin
             </button>
             for state-wide access,{' '}
-            <button type="button" className="btn btn-sm" onClick={() => setUsername('district.tvm')} style={{ margin: '0 2px' }}>
-              district.tvm
+            <button type="button" className="btn btn-sm" onClick={() => setUsername('district.mulugu')} style={{ margin: '0 2px' }}>
+              district.mulugu
             </button>
             for one district, or{' '}
-            <button type="button" className="btn btn-sm" onClick={() => setUsername('girin1.sup')} style={{ margin: '0 2px' }}>
-              girin1.sup
+            <button type="button" className="btn btn-sm" onClick={() => setUsername('jatn1.sup')} style={{ margin: '0 2px' }}>
+              jatn1.sup
             </button>
             for a camp supervisor — the scope rules are enforced here exactly as they are on the server.
           </div>

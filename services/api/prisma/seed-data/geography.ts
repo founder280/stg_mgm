@@ -1,7 +1,7 @@
 /**
- * Demonstration geography: a slice of Tamil Nadu around Thiruvannamalai, the
- * site of the Karthigai Deepam festival, plus the Cuddalore chain used as the
- * worked example in the form specification.
+ * Demonstration geography: a slice of Telangana around Medaram in Mulugu
+ * district, the site of the Sammakka–Saralamma Jatara, plus the neighbouring
+ * districts pilgrims arrive through and the one that receives the referrals.
  *
  * Coordinates are approximate real locations so the dashboard map, the
  * distance maths and the spatial scan all behave realistically.
@@ -26,120 +26,88 @@ export const INDIA: SeedUnit = {
   longitude: 78.67,
   children: [
     {
-      code: 'TN',
-      name: 'Tamil Nadu',
-      nameLocal: 'தமிழ்நாடு',
+      code: 'TG',
+      name: 'Telangana',
+      nameLocal: 'తెలంగాణ',
       level: 'STATE',
-      latitude: 11.1271,
-      longitude: 78.6569,
-      population: 72147030,
+      latitude: 17.9784,
+      longitude: 79.5941,
+      population: 35193978,
       children: [
         {
-          code: 'TN-RGN-N',
-          name: 'Northern Region',
+          // Regions are a configurable master, not a fixed administrative
+          // division of the state. This one groups the three districts the
+          // Jatara is run across, which is how the health department staffs it.
+          code: 'TG-RGN-WGL',
+          name: 'Warangal Region',
           level: 'REGION',
-          latitude: 12.4,
-          longitude: 79.3,
+          latitude: 18.1,
+          longitude: 79.8,
           children: [
             {
-              code: 'TN-TVM',
-              name: 'Tiruvannamalai',
-              nameLocal: 'திருவண்ணாமலை',
+              code: 'TG-MLG',
+              name: 'Mulugu',
+              nameLocal: 'ములుగు',
               level: 'DISTRICT',
-              latitude: 12.2253,
-              longitude: 79.0747,
-              population: 2464875,
+              latitude: 18.195,
+              longitude: 79.94,
+              population: 294671,
               children: [
                 {
-                  code: 'TN-TVM-TK1',
-                  name: 'Tiruvannamalai',
-                  nameLocal: 'திருவண்ணாமலை',
-                  level: 'TALUK',
-                  latitude: 12.2253,
-                  longitude: 79.0747,
+                  code: 'TG-MLG-M1',
+                  name: 'Tadvai',
+                  nameLocal: 'తాడ్వాయి',
+                  level: 'MANDAL',
+                  latitude: 18.3644,
+                  longitude: 80.0906,
                   children: [
                     {
-                      code: 'TN-TVM-V1',
-                      name: 'Adiannamalai',
-                      nameLocal: 'ஆதியண்ணாமலை',
+                      code: 'TG-MLG-V1',
+                      name: 'Medaram',
+                      nameLocal: 'మేడారం',
                       level: 'VILLAGE',
-                      latitude: 12.2361,
-                      longitude: 79.0578,
-                      population: 8200,
+                      latitude: 18.2969,
+                      longitude: 80.2478,
+                      population: 1400,
                       children: [
-                        { code: 'TN-TVM-H1', name: 'Adiannamalai North', level: 'HAMLET', latitude: 12.2405, longitude: 79.0561, population: 3100 },
-                        { code: 'TN-TVM-H2', name: 'Adiannamalai South', level: 'HAMLET', latitude: 12.2318, longitude: 79.0594, population: 5100 },
+                        { code: 'TG-MLG-H1', name: 'Medaram Thanda', level: 'HAMLET', latitude: 18.3011, longitude: 80.2441, population: 600 },
+                        { code: 'TG-MLG-H2', name: 'Chinna Medaram', level: 'HAMLET', latitude: 18.2921, longitude: 80.2519, population: 800 },
                       ],
                     },
                     {
-                      code: 'TN-TVM-V2',
-                      name: 'Perumbakkam',
-                      nameLocal: 'பெரும்பாக்கம்',
+                      code: 'TG-MLG-V2',
+                      name: 'Narlapur',
+                      nameLocal: 'నార్లాపూర్',
                       level: 'VILLAGE',
-                      latitude: 12.2035,
-                      longitude: 79.0912,
-                      population: 6400,
+                      latitude: 18.3183,
+                      longitude: 80.2169,
+                      population: 2400,
                       children: [
-                        { code: 'TN-TVM-H3', name: 'Perumbakkam Kandigai', level: 'HAMLET', latitude: 12.2011, longitude: 79.0951, population: 2600 },
-                        { code: 'TN-TVM-H4', name: 'Perumbakkam Colony', level: 'HAMLET', latitude: 12.2064, longitude: 79.0885, population: 3800 },
+                        { code: 'TG-MLG-H3', name: 'Narlapur Gutta', level: 'HAMLET', latitude: 18.3221, longitude: 80.2131, population: 900 },
+                        { code: 'TG-MLG-H4', name: 'Narlapur Colony', level: 'HAMLET', latitude: 18.3152, longitude: 80.2204, population: 1500 },
                       ],
                     },
                   ],
                 },
                 {
-                  code: 'TN-TVM-TK2',
-                  name: 'Kilpennathur',
-                  nameLocal: 'கீழ்பென்னாத்தூர்',
-                  level: 'TALUK',
-                  latitude: 12.3167,
-                  longitude: 79.2,
+                  code: 'TG-MLG-M2',
+                  name: 'Govindaraopet',
+                  nameLocal: 'గోవిందరావుపేట',
+                  level: 'MANDAL',
+                  latitude: 18.2069,
+                  longitude: 80.0472,
                   children: [
                     {
-                      code: 'TN-TVM-V3',
-                      name: 'Kilpennathur',
+                      code: 'TG-MLG-V3',
+                      name: 'Pasra',
+                      nameLocal: 'పస్రా',
                       level: 'VILLAGE',
-                      latitude: 12.3167,
-                      longitude: 79.2,
-                      population: 12000,
+                      latitude: 18.2361,
+                      longitude: 80.0894,
+                      population: 3800,
                       children: [
-                        { code: 'TN-TVM-H5', name: 'Kilpennathur Main', level: 'HAMLET', latitude: 12.3175, longitude: 79.2019, population: 7000 },
-                        { code: 'TN-TVM-H6', name: 'Melpennathur', level: 'HAMLET', latitude: 12.3241, longitude: 79.1902, population: 5000 },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              code: 'TN-CUD',
-              name: 'Cuddalore',
-              nameLocal: 'கடலூர்',
-              level: 'DISTRICT',
-              latitude: 11.748,
-              longitude: 79.7714,
-              population: 2605914,
-              children: [
-                {
-                  code: 'TN-CUD-TK1',
-                  name: 'Kattumannarkoil',
-                  nameLocal: 'கட்டுமன்னார்கோயில்',
-                  level: 'TALUK',
-                  latitude: 11.4667,
-                  longitude: 79.5667,
-                  children: [
-                    {
-                      code: 'TN-CUD-V1',
-                      name: 'Kozhai',
-                      nameLocal: 'கோழை',
-                      level: 'VILLAGE',
-                      latitude: 11.4712,
-                      longitude: 79.5621,
-                      population: 4300,
-                      children: [
-                        // The example spelled out in the form specification:
-                        // Tamil Nadu > Cuddalore > Kattumannarkoil > Kozhai > Srinedunchery
-                        { code: 'TN-CUD-H1', name: 'Srinedunchery', nameLocal: 'ஸ்ரீநெடுஞ்சேரி', level: 'HAMLET', latitude: 11.4738, longitude: 79.5589, population: 1800 },
-                        { code: 'TN-CUD-H2', name: 'Kozhai Kudiyiruppu', level: 'HAMLET', latitude: 11.4686, longitude: 79.5654, population: 2500 },
+                        { code: 'TG-MLG-H5', name: 'Pasra Main', level: 'HAMLET', latitude: 18.2374, longitude: 80.0911, population: 2200 },
+                        { code: 'TG-MLG-H6', name: 'Bandarupalli', level: 'HAMLET', latitude: 18.2302, longitude: 80.0839, population: 1600 },
                       ],
                     },
                   ],
@@ -147,30 +115,69 @@ export const INDIA: SeedUnit = {
               ],
             },
             {
-              code: 'TN-VLP',
-              name: 'Villupuram',
-              nameLocal: 'விழுப்புரம்',
+              code: 'TG-JSB',
+              name: 'Jayashankar Bhupalpally',
+              nameLocal: 'జయశంకర్ భూపాలపల్లి',
               level: 'DISTRICT',
-              latitude: 11.9401,
-              longitude: 79.4861,
-              population: 2093003,
+              latitude: 18.4333,
+              longitude: 79.8667,
+              population: 416763,
               children: [
                 {
-                  code: 'TN-VLP-TK1',
-                  name: 'Villupuram',
-                  level: 'TALUK',
-                  latitude: 11.9401,
-                  longitude: 79.4861,
+                  code: 'TG-JSB-M1',
+                  name: 'Bhupalpally',
+                  nameLocal: 'భూపాలపల్లి',
+                  level: 'MANDAL',
+                  latitude: 18.4333,
+                  longitude: 79.8667,
                   children: [
                     {
-                      code: 'TN-VLP-V1',
-                      name: 'Kappiyampuliyur',
+                      code: 'TG-JSB-V1',
+                      name: 'Chelpur',
+                      nameLocal: 'చెల్పూర్',
                       level: 'VILLAGE',
-                      latitude: 11.9612,
-                      longitude: 79.4702,
-                      population: 5200,
+                      latitude: 18.4831,
+                      longitude: 79.9297,
+                      population: 14200,
                       children: [
-                        { code: 'TN-VLP-H1', name: 'Kappiyampuliyur East', level: 'HAMLET', latitude: 11.9634, longitude: 79.4738, population: 2400 },
+                        // The example chain used throughout the form
+                        // documentation: Telangana > Jayashankar Bhupalpally >
+                        // Bhupalpally > Chelpur > Singareni Colony.
+                        { code: 'TG-JSB-H1', name: 'Singareni Colony', nameLocal: 'సింగరేణి కాలనీ', level: 'HAMLET', latitude: 18.4867, longitude: 79.9264, population: 6100 },
+                        { code: 'TG-JSB-H2', name: 'Chelpur Bazar', level: 'HAMLET', latitude: 18.4802, longitude: 79.9331, population: 4400 },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              code: 'TG-WGL',
+              name: 'Warangal',
+              nameLocal: 'వరంగల్',
+              level: 'DISTRICT',
+              latitude: 17.9689,
+              longitude: 79.5941,
+              population: 1080858,
+              children: [
+                {
+                  code: 'TG-WGL-M1',
+                  name: 'Hanamkonda',
+                  nameLocal: 'హనుమకొండ',
+                  level: 'MANDAL',
+                  latitude: 18.0,
+                  longitude: 79.56,
+                  children: [
+                    {
+                      code: 'TG-WGL-V1',
+                      name: 'Kazipet',
+                      nameLocal: 'కాజీపేట',
+                      level: 'VILLAGE',
+                      latitude: 17.95,
+                      longitude: 79.5167,
+                      population: 65000,
+                      children: [
+                        { code: 'TG-WGL-H1', name: 'Kazipet Railway Colony', level: 'HAMLET', latitude: 17.9542, longitude: 79.5121, population: 12000 },
                       ],
                     },
                   ],
@@ -190,28 +197,28 @@ export const INDIA: SeedUnit = {
  */
 export const HEALTH_UNITS: SeedUnit[] = [
   {
-    code: 'H-TVM-HUD1',
-    name: 'Tiruvannamalai HUD',
+    code: 'H-MLG-HUD1',
+    name: 'Mulugu HUD',
     level: 'HUD',
-    latitude: 12.2253,
-    longitude: 79.0747,
+    latitude: 18.195,
+    longitude: 79.94,
     children: [
       {
-        code: 'H-TVM-BLK1',
-        name: 'Tiruvannamalai Block',
+        code: 'H-MLG-BLK1',
+        name: 'Tadvai Block',
         level: 'BLOCK',
-        latitude: 12.2253,
-        longitude: 79.0747,
+        latitude: 18.3644,
+        longitude: 80.0906,
         children: [
           {
-            code: 'H-TVM-PHC1',
-            name: 'PHC Adiannamalai',
+            code: 'H-MLG-PHC1',
+            name: 'PHC Medaram',
             level: 'PHC',
-            latitude: 12.2361,
-            longitude: 79.0578,
+            latitude: 18.2969,
+            longitude: 80.2478,
             children: [
-              { code: 'H-TVM-HSC1', name: 'HSC Adiannamalai', level: 'HSC', latitude: 12.2405, longitude: 79.0561 },
-              { code: 'H-TVM-HSC2', name: 'HSC Perumbakkam', level: 'HSC', latitude: 12.2035, longitude: 79.0912 },
+              { code: 'H-MLG-HSC1', name: 'HSC Medaram', level: 'HSC', latitude: 18.3011, longitude: 80.2441 },
+              { code: 'H-MLG-HSC2', name: 'HSC Narlapur', level: 'HSC', latitude: 18.3183, longitude: 80.2169 },
             ],
           },
         ],
@@ -219,26 +226,26 @@ export const HEALTH_UNITS: SeedUnit[] = [
     ],
   },
   {
-    code: 'H-CUD-HUD1',
-    name: 'Chidambaram HUD',
+    code: 'H-JSB-HUD1',
+    name: 'Bhupalpally HUD',
     level: 'HUD',
-    latitude: 11.3993,
-    longitude: 79.6913,
+    latitude: 18.4333,
+    longitude: 79.8667,
     children: [
       {
-        code: 'H-CUD-BLK1',
-        name: 'Kattumannarkoil Block',
+        code: 'H-JSB-BLK1',
+        name: 'Bhupalpally Block',
         level: 'BLOCK',
-        latitude: 11.4667,
-        longitude: 79.5667,
+        latitude: 18.4333,
+        longitude: 79.8667,
         children: [
           {
-            code: 'H-CUD-PHC1',
-            name: 'PHC Kozhai',
+            code: 'H-JSB-PHC1',
+            name: 'PHC Chelpur',
             level: 'PHC',
-            latitude: 11.4712,
-            longitude: 79.5621,
-            children: [{ code: 'H-CUD-HSC1', name: 'HSC Srinedunchery', level: 'HSC', latitude: 11.4738, longitude: 79.5589 }],
+            latitude: 18.4831,
+            longitude: 79.9297,
+            children: [{ code: 'H-JSB-HSC1', name: 'HSC Singareni Colony', level: 'HSC', latitude: 18.4867, longitude: 79.9264 }],
           },
         ],
       },
@@ -246,41 +253,41 @@ export const HEALTH_UNITS: SeedUnit[] = [
   },
 ];
 
-/** Festival zones — main divisions and sub-divisions of the gathering area. */
+/** Jatara zones — main divisions and sub-divisions of the gathering area. */
 export const FESTIVAL_ZONES = [
   {
-    code: 'Z-GIRI',
-    name: 'Girivalam Path',
-    latitude: 12.2253,
-    longitude: 79.0747,
+    code: 'Z-JATARA',
+    name: 'Jatara Grounds',
+    latitude: 18.2969,
+    longitude: 80.2478,
     expectedFootfall: 1200000,
     children: [
-      { code: 'Z-GIRI-N', name: 'Girivalam North Sector', latitude: 12.2461, longitude: 79.0689, expectedFootfall: 380000 },
-      { code: 'Z-GIRI-E', name: 'Girivalam East Sector', latitude: 12.2287, longitude: 79.0961, expectedFootfall: 340000 },
-      { code: 'Z-GIRI-S', name: 'Girivalam South Sector', latitude: 12.2044, longitude: 79.0712, expectedFootfall: 290000 },
-      { code: 'Z-GIRI-W', name: 'Girivalam West Sector', latitude: 12.2298, longitude: 79.0511, expectedFootfall: 190000 },
+      { code: 'Z-JAT-N', name: 'Jatara North Sector', latitude: 18.3061, longitude: 80.2452, expectedFootfall: 380000 },
+      { code: 'Z-JAT-E', name: 'Jatara East Sector', latitude: 18.2981, longitude: 80.2604, expectedFootfall: 340000 },
+      { code: 'Z-JAT-S', name: 'Jatara South Sector', latitude: 18.2848, longitude: 80.2461, expectedFootfall: 290000 },
+      { code: 'Z-JAT-W', name: 'Jatara West Sector', latitude: 18.2991, longitude: 80.2331, expectedFootfall: 190000 },
     ],
   },
   {
-    code: 'Z-TEMPLE',
-    name: 'Temple Precinct',
-    latitude: 12.2312,
-    longitude: 79.0672,
+    code: 'Z-GADDE',
+    name: 'Gadde Precinct',
+    latitude: 18.2952,
+    longitude: 80.2489,
     expectedFootfall: 900000,
     children: [
-      { code: 'Z-TEMPLE-Q', name: 'Darshan Queue Complex', latitude: 12.2318, longitude: 79.0665, expectedFootfall: 600000 },
-      { code: 'Z-TEMPLE-M', name: 'Mada Streets', latitude: 12.2301, longitude: 79.0688, expectedFootfall: 300000 },
+      { code: 'Z-GADDE-S', name: 'Sammakka Gadde Queue', latitude: 18.2958, longitude: 80.2482, expectedFootfall: 600000 },
+      { code: 'Z-GADDE-R', name: 'Saralamma Gadde', latitude: 18.2941, longitude: 80.2497, expectedFootfall: 300000 },
     ],
   },
   {
-    code: 'Z-TRANSIT',
-    name: 'Transit and Parking',
-    latitude: 12.2131,
-    longitude: 79.0821,
+    code: 'Z-JAMPANNA',
+    name: 'Jampanna Vagu and Transit',
+    latitude: 18.2891,
+    longitude: 80.2551,
     expectedFootfall: 500000,
     children: [
-      { code: 'Z-TRANSIT-BUS', name: 'Temporary Bus Stand', latitude: 12.2118, longitude: 79.0834, expectedFootfall: 300000 },
-      { code: 'Z-TRANSIT-PARK', name: 'Vehicle Parking Grounds', latitude: 12.2149, longitude: 79.0798, expectedFootfall: 200000 },
+      { code: 'Z-JAMP-GHAT', name: 'Jampanna Vagu Bathing Ghats', latitude: 18.2878, longitude: 80.2564, expectedFootfall: 300000 },
+      { code: 'Z-JAMP-PARK', name: 'Vehicle Parking and Bus Stand', latitude: 18.2909, longitude: 80.2528, expectedFootfall: 200000 },
     ],
   },
 ];

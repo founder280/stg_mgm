@@ -49,7 +49,7 @@ Everything that constitutes *judgement* is the real thing, delegated to
 - Holt forecasting and stockout projection
 - the role, permission and data-scope rules
 
-So when the demonstration says *Acute Diarrhoeal Disease at Girivalam North
+So when the demonstration says *Acute Diarrhoeal Disease at Jatara North
 Medical Camp, 30 observed against 1.7 expected, flagged by four detectors*, that
 is the same computation the server performs, on the same data.
 
@@ -58,8 +58,8 @@ is the same computation the server performs, on the same data.
 - **Persistence.** Anything you create lives for the life of the page. Reload
   and it is gone.
 - **Authentication.** Any password is accepted for a seeded username. Scope and
-  permission enforcement, however, *is* applied — sign in as `district.cud` and
-  you will see nothing outside Cuddalore, because the same scope resolution runs.
+  permission enforcement, however, *is* applied — sign in as `district.bhupalpally` and
+  you will see nothing outside Jayashankar Bhupalpally, because the same scope resolution runs.
 - **Aggregation** happens in JavaScript rather than SQL.
 - **The scheduled surveillance pass**, sync between real devices, the audit
   trail and the stock ledger's transactional guarantees all need a server.

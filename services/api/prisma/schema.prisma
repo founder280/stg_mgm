@@ -189,7 +189,7 @@ enum AddressLevel {
   STATE
   REGION
   DISTRICT
-  TALUK
+  MANDAL
   PANCHAYAT
   HUD
   BLOCK

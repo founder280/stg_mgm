@@ -2,6 +2,7 @@
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import dotenv from 'dotenv';
+import { requireTestDatabase } from './require-test-database.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -10,6 +11,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const fromEnvironment = process.env.DATABASE_URL;
 dotenv.config({ path: path.resolve(here, '../.env.test'), override: true });
 if (fromEnvironment) process.env.DATABASE_URL = fromEnvironment;
+
+requireTestDatabase(process.env.DATABASE_URL);
 
 process.env.NODE_ENV = 'test';
 process.env.JWT_ACCESS_SECRET ??= 'test-access-secret-that-is-long-enough-for-validation';

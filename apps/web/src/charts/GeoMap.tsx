@@ -33,6 +33,9 @@ interface Placed<T> {
  *   - camps                — squares, so a camp is never mistaken for a case
  *     cluster, carrying their own operational status.
  */
+/** Height of the legend overlay plus the largest circle radius above it. */
+const LEGEND_CLEARANCE = 68;
+
 export function GeoMap({ geo, camps, clusters = [], height = 420, onSelectCamp, selectedCampIds = [] }: Props) {
   const [transform, setTransform] = useState({ k: 1, x: 0, y: 0 });
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -67,9 +70,11 @@ export function GeoMap({ geo, camps, clusters = [], height = 420, onSelectCamp, 
     };
     return proj.fitExtent(
       [
-        // Extra top padding so a label above the highest circle is not clipped.
+        // Extra top padding so a label above the highest circle is not clipped,
+        // and enough at the bottom to clear the scale legend pinned there — a
+        // circle that lands under it cannot be read or hovered.
         [30, 34],
-        [width - 30, height - 30],
+        [width - 30, height - LEGEND_CLEARANCE],
       ],
       feature,
     );

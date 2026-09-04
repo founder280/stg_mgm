@@ -92,7 +92,7 @@ async function fillRegistration({ name, years, gender, symptoms }) {
 try {
   // --- Sign in and pull the offline bundle -------------------------------
   await page.goto(FIELD_APP, { waitUntil: 'networkidle' });
-  await page.fill('#username', 'girin1.vol1');
+  await page.fill('#username', 'jatn1.vol1');
   await page.fill('#password', PASSWORD);
   await page.click('button[type=submit]');
   await page.waitForSelector('.step-title', { timeout: 30_000 });
@@ -121,7 +121,7 @@ try {
     await page.locator('.pick').first().click();
     await page.waitForTimeout(220);
   }
-  check('the address picker drills down to a hamlet offline', (await page.textContent('body')).includes('Selected:'));
+  check('the address picker drills down to a habitation offline', (await page.textContent('body')).includes('Selected:'));
   await page.click('.actions button.primary');
 
   await page.waitForSelector('.keypad');

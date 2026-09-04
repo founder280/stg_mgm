@@ -49,7 +49,7 @@ export interface TreatmentProtocol {
   advice: string[];
 }
 
-const STG = 'Standard Treatment Guidelines, Directorate of Public Health, Tamil Nadu';
+const STG = 'Standard Treatment Guidelines, Directorate of Public Health, Telangana';
 
 export const TREATMENT_PROTOCOLS: TreatmentProtocol[] = [
   {

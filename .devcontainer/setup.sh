@@ -42,6 +42,6 @@ cat <<'DONE'
     npm run dev        API :4000 · Console :5173 · Field app :5174
 
   Sign in as state.admin / ChangeMe@2026
-  Other accounts: district.tvm, girin1.sup, girin1.mo, girin1.vol1
+  Other accounts: district.mulugu, jatn1.sup, jatn1.mo, jatn1.vol1
 
 DONE

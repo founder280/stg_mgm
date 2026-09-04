@@ -2,11 +2,12 @@
  * Development seed.
  *
  * Builds a complete, self-consistent demonstration of a live gathering: the
- * Karthigai Deepam festival at Tiruvannamalai, with three districts, a zoned
- * festival area, eight camps, staff for every role, and ten days of walk-in
- * traffic. A waterborne diarrhoea outbreak is deliberately planted in one
- * sector over the final three days so the aberration detectors, the spatial
- * scan and the stockout projection all have something real to find.
+ * Sammakka-Saralamma Jatara at Medaram in Mulugu district, Telangana, with
+ * three districts, a zoned gathering area, eight camps, staff for every role,
+ * and ten days of walk-in traffic. A waterborne diarrhoea outbreak is
+ * deliberately planted in one sector over the final three days so the
+ * aberration detectors, the spatial scan and the stockout projection all have
+ * something real to find.
  */
 import { randomUUID } from 'node:crypto';
 import { PrismaClient, type Prisma } from '@prisma/client';
@@ -48,11 +49,11 @@ const randInt = (min: number, max: number) => Math.floor(rand() * (max - min + 1
 const chance = (p: number) => rand() < p;
 
 const FIRST_NAMES = [
-  'MURUGAN', 'LAKSHMI', 'ARUN', 'KAVITHA', 'SELVAM', 'PRIYA', 'RAMESH', 'DEEPA',
-  'KUMAR', 'MEENA', 'VELU', 'SARANYA', 'ANBU', 'REVATHI', 'GOPAL', 'JANANI',
-  'SIVA', 'MALINI', 'RAJA', 'PADMA', 'KARTHIK', 'VIJAYA', 'SURESH', 'BHAVANI',
+  'RAJESHAM', 'SWAROOPA', 'SRINIVAS', 'ANITHA', 'MALLESH', 'SWATHI', 'RAMULU', 'DIVYA',
+  'NARESH', 'PADMAJA', 'YADAIAH', 'SANDHYA', 'KOMURAIAH', 'RENUKA', 'VENKANNA', 'JYOTHI',
+  'SAMMAIAH', 'LAVANYA', 'RAVINDER', 'SUJATHA', 'KIRAN', 'VANAJA', 'PRAVEEN', 'BHARATHI',
 ];
-const SURNAMES = ['RAJAN', 'MURTHY', 'PILLAI', 'NADAR', 'GOUNDER', 'IYER', 'DEVI', 'KANNAN', 'SUBRAMANIAN', 'VELAN'];
+const SURNAMES = ['REDDY', 'RAO', 'GOUD', 'YADAV', 'NAIK', 'BANOTH', 'DURGAM', 'KODAM', 'ANNAM', 'MADDELA'];
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -222,7 +223,7 @@ async function seedAddressTree() {
   await insert(INDIA, null, 'ADMIN', '');
 
   // The health chain hangs off the same districts.
-  const districtForHealth: Record<string, string> = { 'H-TVM-HUD1': 'TN-TVM', 'H-CUD-HUD1': 'TN-CUD' };
+  const districtForHealth: Record<string, string> = { 'H-MLG-HUD1': 'TG-MLG', 'H-JSB-HUD1': 'TG-JSB' };
   for (const hud of HEALTH_UNITS) {
     const district = index.get(districtForHealth[hud.code]!)!;
     const districtRow = await prisma.addressUnit.findUnique({ where: { id: district.id } });
@@ -233,22 +234,22 @@ async function seedAddressTree() {
 }
 
 async function seedFacilities(index: Map<string, AddressRecord>) {
-  const tvm = index.get('TN-TVM')!;
-  const cud = index.get('TN-CUD')!;
-  const vlp = index.get('TN-VLP')!;
+  const mlg = index.get('TG-MLG')!;
+  const jsb = index.get('TG-JSB')!;
+  const wgl = index.get('TG-WGL')!;
 
   const data: Prisma.FacilityCreateManyInput[] = [
-    { code: 'GH-TVM', name: 'Government Headquarters Hospital, Tiruvannamalai', type: 'DISTRICT_HOSPITAL', districtId: tvm.id, latitude: 12.2289, longitude: 79.0712, specialities: ['GENERAL_MEDICINE', 'GENERAL_SURGERY', 'ORTHOPAEDICS', 'PAEDIATRICS', 'OBSTETRICS', 'TRAUMA'], bedCapacity: 500, isEmpanelled: true, contactName: 'Dean, GH Tiruvannamalai', contactPhone: '+914175222333' },
-    { code: 'MCH-VLP', name: 'Government Medical College Hospital, Villupuram', type: 'MEDICAL_COLLEGE', districtId: vlp.id, latitude: 11.9385, longitude: 79.4934, specialities: ['GENERAL_MEDICINE', 'CARDIOLOGY', 'NEUROLOGY', 'TRAUMA', 'BURNS', 'TOXICOLOGY'], bedCapacity: 850, isEmpanelled: true, contactPhone: '+914146222444' },
-    { code: 'EMP-ARUNA', name: 'Arunachala Multispeciality Hospital', type: 'EMPANELLED_HOSPITAL', districtId: tvm.id, latitude: 12.2198, longitude: 79.0803, specialities: ['GENERAL_MEDICINE', 'ORTHOPAEDICS', 'GENERAL_SURGERY'], bedCapacity: 120, isEmpanelled: true, contactPhone: '+914175233444' },
-    { code: 'EMP-SRIRAM', name: 'Sriram Trauma Centre', type: 'EMPANELLED_HOSPITAL', districtId: tvm.id, latitude: 12.2402, longitude: 79.0891, specialities: ['TRAUMA', 'ORTHOPAEDICS'], bedCapacity: 60, isEmpanelled: true, contactPhone: '+914175244555' },
-    { code: 'PHC-ADI', name: 'PHC Adiannamalai', type: 'PHC', districtId: tvm.id, latitude: 12.2361, longitude: 79.0578, specialities: ['GENERAL_MEDICINE'], bedCapacity: 6 },
-    { code: 'PHC-KOZHAI', name: 'PHC Kozhai', type: 'PHC', districtId: cud.id, latitude: 11.4712, longitude: 79.5621, specialities: ['GENERAL_MEDICINE'], bedCapacity: 6 },
-    { code: 'LAB-TVM', name: 'District Public Health Laboratory, Tiruvannamalai', type: 'LABORATORY', districtId: tvm.id, latitude: 12.2271, longitude: 79.0729, contactPhone: '+914175255666' },
-    { code: 'LAB-KING', name: 'King Institute of Preventive Medicine, Guindy', type: 'LABORATORY', districtId: tvm.id, latitude: 13.0067, longitude: 80.2206, contactPhone: '+914422501520' },
-    { code: 'WH-TVM', name: 'TNMSC Drug Warehouse, Tiruvannamalai', type: 'DRUG_WAREHOUSE', districtId: tvm.id, latitude: 12.2183, longitude: 79.0669 },
-    { code: 'AMB-108-TVM', name: '108 Ambulance Base, Tiruvannamalai', type: 'AMBULANCE_BASE', districtId: tvm.id, latitude: 12.2265, longitude: 79.0756, contactPhone: '108' },
-    { code: 'CR-TVM', name: 'Festival Control Room, Tiruvannamalai', type: 'CONTROL_ROOM', districtId: tvm.id, latitude: 12.2312, longitude: 79.0672 },
+    { code: 'DH-MLG', name: 'District Hospital, Mulugu', type: 'DISTRICT_HOSPITAL', districtId: mlg.id, latitude: 18.1938, longitude: 79.9421, specialities: ['GENERAL_MEDICINE', 'GENERAL_SURGERY', 'ORTHOPAEDICS', 'PAEDIATRICS', 'OBSTETRICS', 'TRAUMA'], bedCapacity: 200, isEmpanelled: true, contactName: 'Superintendent, District Hospital Mulugu', contactPhone: '+918715222333' },
+    { code: 'MGM-WGL', name: 'MGM Hospital, Warangal', type: 'MEDICAL_COLLEGE', districtId: wgl.id, latitude: 17.9784, longitude: 79.5941, specialities: ['GENERAL_MEDICINE', 'CARDIOLOGY', 'NEUROLOGY', 'TRAUMA', 'BURNS', 'TOXICOLOGY'], bedCapacity: 1100, isEmpanelled: true, contactName: 'Superintendent, MGM Hospital', contactPhone: '+918702440444' },
+    { code: 'AH-BPL', name: 'Area Hospital, Bhupalpally', type: 'EMPANELLED_HOSPITAL', districtId: jsb.id, latitude: 18.4351, longitude: 79.8694, specialities: ['GENERAL_MEDICINE', 'ORTHOPAEDICS', 'GENERAL_SURGERY'], bedCapacity: 100, isEmpanelled: true, contactPhone: '+918713233444' },
+    { code: 'EMP-KAKATIYA', name: 'Kakatiya Trauma Centre, Hanamkonda', type: 'EMPANELLED_HOSPITAL', districtId: wgl.id, latitude: 18.0021, longitude: 79.5613, specialities: ['TRAUMA', 'ORTHOPAEDICS'], bedCapacity: 60, isEmpanelled: true, contactPhone: '+918702455555' },
+    { code: 'PHC-MEDARAM', name: 'PHC Medaram', type: 'PHC', districtId: mlg.id, latitude: 18.2969, longitude: 80.2478, specialities: ['GENERAL_MEDICINE'], bedCapacity: 6 },
+    { code: 'PHC-CHELPUR', name: 'PHC Chelpur', type: 'PHC', districtId: jsb.id, latitude: 18.4831, longitude: 79.9297, specialities: ['GENERAL_MEDICINE'], bedCapacity: 6 },
+    { code: 'LAB-WGL', name: 'District Public Health Laboratory, Warangal', type: 'LABORATORY', districtId: wgl.id, latitude: 17.9812, longitude: 79.5904, contactPhone: '+918702466666' },
+    { code: 'LAB-IPM', name: 'Institute of Preventive Medicine, Narayanaguda', type: 'LABORATORY', districtId: wgl.id, latitude: 17.3958, longitude: 78.4894, contactPhone: '+914024757326' },
+    { code: 'WH-TSMSIDC', name: 'TSMSIDC Drug Warehouse, Warangal', type: 'DRUG_WAREHOUSE', districtId: wgl.id, latitude: 17.9727, longitude: 79.6011 },
+    { code: 'AMB-108-MLG', name: '108 Ambulance Base, Mulugu', type: 'AMBULANCE_BASE', districtId: mlg.id, latitude: 18.1961, longitude: 79.9388, contactPhone: '108' },
+    { code: 'CR-MEDARAM', name: 'Jatara Control Room, Medaram', type: 'CONTROL_ROOM', districtId: mlg.id, latitude: 18.2952, longitude: 80.2489 },
   ];
 
   await prisma.facility.createMany({ data });
@@ -313,19 +314,19 @@ async function seedEvent(index: Map<string, AddressRecord>) {
 
   const event = await prisma.event.create({
     data: {
-      code: 'KD-TVM-2026',
-      name: 'Karthigai Deepam Festival, Tiruvannamalai',
+      code: 'SSJ-MDM-2026',
+      name: 'Sammakka-Saralamma Jatara, Medaram',
       description:
-        'Annual mass gathering around the Arunachaleswarar temple and the 14 km Girivalam path. Peak single-day footfall exceeds two million pilgrims.',
+        'Biennial tribal congregation at the Medaram gaddes and the Jampanna Vagu bathing ghats, held over four days. Asia\u2019s largest tribal gathering: cumulative footfall exceeds one crore pilgrims.',
       startDate: start,
       endDate: end,
       expectedFootfall: 3000000,
       stayReferenceDate: start,
       districts: {
         create: [
-          { district: { connect: { id: index.get('TN-TVM')!.id } } },
-          { district: { connect: { id: index.get('TN-CUD')!.id } } },
-          { district: { connect: { id: index.get('TN-VLP')!.id } } },
+          { district: { connect: { id: index.get('TG-MLG')!.id } } },
+          { district: { connect: { id: index.get('TG-JSB')!.id } } },
+          { district: { connect: { id: index.get('TG-WGL')!.id } } },
         ],
       },
     },
@@ -364,16 +365,15 @@ async function seedEvent(index: Map<string, AddressRecord>) {
 }
 
 const CAMP_PLAN = [
-  { code: 'C-GIRI-N1', name: 'Girivalam North Medical Camp', zone: 'Z-GIRI-N', district: 'TN-TVM', lat: 12.2455, lon: 79.0681, type: 'MEDICAL_CAMP' },
-  { code: 'C-GIRI-N2', name: 'Adiannamalai First Aid Post', zone: 'Z-GIRI-N', district: 'TN-TVM', lat: 12.2398, lon: 79.0602, type: 'FIRST_AID_POST' },
-  { code: 'C-GIRI-E1', name: 'Girivalam East Medical Camp', zone: 'Z-GIRI-E', district: 'TN-TVM', lat: 12.2281, lon: 79.0955, type: 'MEDICAL_CAMP' },
-  { code: 'C-GIRI-S1', name: 'Girivalam South Medical Camp', zone: 'Z-GIRI-S', district: 'TN-TVM', lat: 12.2049, lon: 79.0718, type: 'MEDICAL_CAMP' },
-  { code: 'C-GIRI-W1', name: 'Girivalam West First Aid Post', zone: 'Z-GIRI-W', district: 'TN-TVM', lat: 12.2291, lon: 79.0519, type: 'FIRST_AID_POST' },
-  { code: 'C-TEMPLE-Q1', name: 'Darshan Queue Medical Camp', zone: 'Z-TEMPLE-Q', district: 'TN-TVM', lat: 12.2321, lon: 79.0661, type: 'MEDICAL_CAMP' },
-  { code: 'C-TEMPLE-M1', name: 'Mada Street Mobile Unit', zone: 'Z-TEMPLE-M', district: 'TN-TVM', lat: 12.2304, lon: 79.0691, type: 'MOBILE_UNIT' },
-  { code: 'C-TRANSIT-B1', name: 'Bus Stand Medical Camp', zone: 'Z-TRANSIT-BUS', district: 'TN-TVM', lat: 12.2121, lon: 79.0838, type: 'MEDICAL_CAMP' },
+  { code: 'C-JAT-N1', name: 'Jatara North Medical Camp', zone: 'Z-JAT-N', district: 'TG-MLG', lat: 18.3055, lon: 80.2445, type: 'MEDICAL_CAMP' },
+  { code: 'C-JAT-N2', name: 'Medaram Thanda First Aid Post', zone: 'Z-JAT-N', district: 'TG-MLG', lat: 18.3008, lon: 80.2438, type: 'FIRST_AID_POST' },
+  { code: 'C-JAT-E1', name: 'Jatara East Medical Camp', zone: 'Z-JAT-E', district: 'TG-MLG', lat: 18.2975, lon: 80.2598, type: 'MEDICAL_CAMP' },
+  { code: 'C-JAT-S1', name: 'Jatara South Medical Camp', zone: 'Z-JAT-S', district: 'TG-MLG', lat: 18.2853, lon: 80.2468, type: 'MEDICAL_CAMP' },
+  { code: 'C-JAT-W1', name: 'Jatara West First Aid Post', zone: 'Z-JAT-W', district: 'TG-MLG', lat: 18.2985, lon: 80.2339, type: 'FIRST_AID_POST' },
+  { code: 'C-GADDE-S1', name: 'Sammakka Gadde Queue Medical Camp', zone: 'Z-GADDE-S', district: 'TG-MLG', lat: 18.2961, lon: 80.2478, type: 'MEDICAL_CAMP' },
+  { code: 'C-GADDE-R1', name: 'Saralamma Gadde Mobile Unit', zone: 'Z-GADDE-R', district: 'TG-MLG', lat: 18.2944, lon: 80.2501, type: 'MOBILE_UNIT' },
+  { code: 'C-JAMP-G1', name: 'Jampanna Vagu Ghat Medical Camp', zone: 'Z-JAMP-GHAT', district: 'TG-MLG', lat: 18.2881, lon: 80.2569, type: 'MEDICAL_CAMP' },
 ];
-
 async function seedCamps(
   eventId: string,
   zoneIndex: Map<string, { id: string }>,
@@ -391,7 +391,7 @@ async function seedCamps(
         type: plan.type as never,
         zoneId: zoneIndex.get(plan.zone)!.id,
         districtId: addressIndex.get(plan.district)!.id,
-        facilityId: plan.code === 'C-GIRI-N2' ? facilities.get('PHC-ADI')!.id : null,
+        facilityId: plan.code === 'C-JAT-N2' ? facilities.get('PHC-MEDARAM')!.id : null,
         latitude: plan.lat,
         longitude: plan.lon,
         symptomCodes,
@@ -406,18 +406,17 @@ async function seedCamps(
 }
 
 const USER_PLAN = [
-  { username: 'state.admin', fullName: 'Dr. A. Rajeshwari', role: 'STATE_SUPER_ADMIN', designation: 'Director of Public Health', dept: 'HEALTH', scope: null },
-  { username: 'state.officer', fullName: 'Dr. S. Venkatesan', role: 'STATE_OFFICER', designation: 'Joint Director (Communicable Diseases)', dept: 'HEALTH', scope: null },
-  { username: 'region.north', fullName: 'Dr. K. Meenakshi', role: 'REGIONAL_USER', designation: 'Regional Deputy Director', dept: 'HEALTH', scope: { type: 'REGION', code: 'TN-RGN-N' } },
-  { username: 'dept.health.head', fullName: 'Dr. M. Anbarasan', role: 'DEPARTMENT_HEAD', designation: 'Head, Health Department', dept: 'HEALTH', scope: null },
-  { username: 'dept.idsp', fullName: 'Dr. P. Nithya', role: 'DEPARTMENT_DOMAIN_USER', designation: 'State IDSP Surveillance Officer', dept: 'HEALTH', scope: null },
-  { username: 'dept.revenue.head', fullName: 'Thiru R. Chandrasekar', role: 'DEPARTMENT_HEAD', designation: 'Head, Revenue Department', dept: 'REVENUE', scope: null },
-  { username: 'district.tvm', fullName: 'Dr. V. Kalaiselvi', role: 'DISTRICT_USER', designation: 'Deputy Director of Health Services', dept: 'HEALTH', scope: { type: 'DISTRICT', code: 'TN-TVM' } },
-  { username: 'district.cud', fullName: 'Dr. T. Saravanan', role: 'DISTRICT_USER', designation: 'Deputy Director of Health Services', dept: 'HEALTH', scope: { type: 'DISTRICT', code: 'TN-CUD' } },
-  { username: 'district.tvm.idsp', fullName: 'Dr. G. Bhuvaneswari', role: 'DISTRICT_DOMAIN_USER', designation: 'District Surveillance Officer, DSU-IDSP', dept: 'HEALTH', scope: { type: 'DISTRICT', code: 'TN-TVM' } },
-  { username: 'district.tvm.drugs', fullName: 'Thiru N. Elangovan', role: 'DISTRICT_DOMAIN_USER', designation: 'District Drug Store In-charge', dept: 'HEALTH', scope: { type: 'DISTRICT', code: 'TN-TVM' } },
+  { username: 'state.admin', fullName: 'Dr. A. Rajitha', role: 'STATE_SUPER_ADMIN', designation: 'Director of Public Health and Family Welfare', dept: 'HEALTH', scope: null },
+  { username: 'state.officer', fullName: 'Dr. S. Venkateshwarlu', role: 'STATE_OFFICER', designation: 'Additional Director (Communicable Diseases)', dept: 'HEALTH', scope: null },
+  { username: 'region.warangal', fullName: 'Dr. K. Madhavi', role: 'REGIONAL_USER', designation: 'Regional Director of Health Services, Warangal', dept: 'HEALTH', scope: { type: 'REGION', code: 'TG-RGN-WGL' } },
+  { username: 'dept.health.head', fullName: 'Dr. M. Anjaneyulu', role: 'DEPARTMENT_HEAD', designation: 'Head, Health Department', dept: 'HEALTH', scope: null },
+  { username: 'dept.idsp', fullName: 'Dr. P. Nikhitha', role: 'DEPARTMENT_DOMAIN_USER', designation: 'State IDSP Surveillance Officer', dept: 'HEALTH', scope: null },
+  { username: 'dept.revenue.head', fullName: 'Sri R. Chandrashekar', role: 'DEPARTMENT_HEAD', designation: 'Head, Revenue Department', dept: 'REVENUE', scope: null },
+  { username: 'district.mulugu', fullName: 'Dr. V. Kalpana', role: 'DISTRICT_USER', designation: 'District Medical and Health Officer', dept: 'HEALTH', scope: { type: 'DISTRICT', code: 'TG-MLG' } },
+  { username: 'district.bhupalpally', fullName: 'Dr. T. Saidulu', role: 'DISTRICT_USER', designation: 'District Medical and Health Officer', dept: 'HEALTH', scope: { type: 'DISTRICT', code: 'TG-JSB' } },
+  { username: 'district.mulugu.idsp', fullName: 'Dr. G. Bhuvaneshwari', role: 'DISTRICT_DOMAIN_USER', designation: 'District Surveillance Officer, DSU-IDSP', dept: 'HEALTH', scope: { type: 'DISTRICT', code: 'TG-MLG' } },
+  { username: 'district.mulugu.drugs', fullName: 'Sri N. Ilaiah', role: 'DISTRICT_DOMAIN_USER', designation: 'District Drug Store In-charge', dept: 'HEALTH', scope: { type: 'DISTRICT', code: 'TG-MLG' } },
 ];
-
 async function seedUsers(
   roles: Map<string, string>,
   departments: Map<string, string>,
@@ -434,7 +433,7 @@ async function seedUsers(
       data: {
         username: plan.username,
         fullName: plan.fullName,
-        email: `${plan.username}@tn.gov.in`,
+        email: `${plan.username}@telangana.gov.in`,
         mobile: `+91${randInt(6000000000, 9999999999)}`,
         passwordHash: hash,
         designation: plan.designation,
@@ -502,7 +501,7 @@ async function seedInventory(
       const drugRow = drugs.get(drug.code)!;
       // The camp at the centre of the planted outbreak ends nearly out of ORS.
       const closing =
-        camp.code === 'C-GIRI-N1' && drug.code === 'ORS' ? 35 : drug.reorderLevel * randInt(2, 5);
+        camp.code === 'C-JAT-N1' && drug.code === 'ORS' ? 35 : drug.reorderLevel * randInt(2, 5);
 
       closingBalances.set(`${camp.id}:${drugRow.id}`, closing);
       await prisma.campInventory.create({
@@ -546,7 +545,7 @@ async function reconcileStockLedger(
         type: 'RECEIPT',
         quantity: opening,
         balanceAfter: balance,
-        reference: 'Opening stock from TNMSC warehouse',
+        reference: 'Opening stock from TSMSIDC warehouse',
         createdAt: new Date(Date.now() - 10 * 86_400_000),
       },
     });
@@ -613,7 +612,7 @@ async function seedRosterAndReadiness(
       equipmentCode: e.code,
       // One camp deliberately has a non-functional oxygen cylinder.
       status:
-        camp.code === 'C-GIRI-W1' && e.code === 'OXYGEN_CYLINDER'
+        camp.code === 'C-JAT-W1' && e.code === 'OXYGEN_CYLINDER'
           ? ('NOT_FUNCTIONAL' as const)
           : chance(0.94)
             ? ('FUNCTIONAL' as const)
@@ -630,7 +629,7 @@ async function seedRosterAndReadiness(
         reportDate: new Date(dayKey(today)),
         venueReady: true,
         waterAvailable: true,
-        powerAvailable: camp.code !== 'C-GIRI-W1',
+        powerAvailable: camp.code !== 'C-JAT-W1',
         wasteDisposalReady: true,
         feedback: 'Crowd density high during the evening girivalam. Additional ORS counters requested.',
         readinessPercent,
@@ -638,7 +637,7 @@ async function seedRosterAndReadiness(
         photos: {
           create: CAMP_PHOTO_KINDS.filter((p) => p.required).map((p) => ({
             kind: p.code,
-            url: `https://storage.mgms.tn.gov.in/camps/${camp.code}/${p.code.toLowerCase()}.jpg`,
+            url: `https://storage.mgms.telangana.gov.in/camps/${camp.code}/${p.code.toLowerCase()}.jpg`,
             capturedAt: new Date(),
           })),
         },
@@ -701,16 +700,16 @@ async function seedWalkIns(
   for (let dayOffset = 9; dayOffset >= 0; dayOffset -= 1) {
     const day = new Date(today);
     day.setDate(day.getDate() - dayOffset);
-    // Footfall ramps towards the deepam day.
+    // Footfall ramps towards the day the deities are brought to the gaddes.
     const dayFactor = 0.5 + (9 - dayOffset) * 0.12;
 
     for (const camp of camps) {
-      const baseVolume = camp.code.includes('TEMPLE') ? 26 : camp.code.includes('FIRST_AID') ? 10 : 18;
+      const baseVolume = camp.code.includes('GADDE') ? 26 : camp.type === 'FIRST_AID_POST' ? 10 : 18;
       let volume = Math.round(baseVolume * dayFactor * (0.8 + rand() * 0.4));
 
-      // Planted outbreak: a contaminated water point in the Girivalam North
+      // Planted outbreak: a contaminated water point in the Jatara North
       // sector drives extra diarrhoea cases over the last three days.
-      const outbreakCamp = camp.code === 'C-GIRI-N1';
+      const outbreakCamp = camp.code === 'C-JAT-N1';
       const outbreakDay = dayOffset <= 2;
       const extraDiarrhoea = outbreakCamp && outbreakDay ? [14, 22, 28][2 - dayOffset]! : 0;
       volume += extraDiarrhoea;

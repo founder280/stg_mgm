@@ -1,10 +1,12 @@
 /**
  * Address hierarchy.
  *
- * The form spec calls for three parallel hierarchies over the same villages:
- *   Revenue      : District > Taluk > Panchayat > Village > Hamlet
- *   Health       : District > HUD > Block > PHC > HSC > Village > Hamlet
- *   Data entry   : District > Taluk > Village > Hamlet   (the short path used at the camp)
+ * The form spec calls for three parallel hierarchies over the same villages,
+ * named here as Telangana names them — the sub-district revenue unit is the
+ * mandal, and the settlement below a village is a habitation:
+ *   Revenue      : District > Mandal > Panchayat > Village > Habitation
+ *   Health       : District > HUD > Block > PHC > HSC > Village > Habitation
+ *   Data entry   : District > Mandal > Village > Habitation  (the short path used at the camp)
  *
  * They are stored as one self-referencing tree of `AddressUnit` rows tagged
  * with a `hierarchy`, so a hamlet can be reached from either chain and a case
@@ -19,7 +21,7 @@ export const ADDRESS_LEVELS = [
   'STATE',
   'REGION',
   'DISTRICT',
-  'TALUK',
+  'MANDAL',
   'PANCHAYAT',
   'HUD',
   'BLOCK',
@@ -36,14 +38,14 @@ export const LEVEL_LABELS: Record<AddressLevel, string> = {
   STATE: 'State',
   REGION: 'Region',
   DISTRICT: 'District',
-  TALUK: 'Taluk',
+  MANDAL: 'Mandal',
   PANCHAYAT: 'Panchayat',
   HUD: 'Health Unit District',
   BLOCK: 'Block',
   PHC: 'Primary Health Centre',
   HSC: 'Health Sub-Centre',
   VILLAGE: 'Village',
-  HAMLET: 'Hamlet',
+  HAMLET: 'Habitation',
 };
 
 /** Valid parent levels per hierarchy — enforced when saving the master. */
@@ -53,15 +55,15 @@ export const ALLOWED_PARENTS: Record<AddressHierarchy, Partial<Record<AddressLev
     STATE: ['COUNTRY'],
     REGION: ['STATE'],
     DISTRICT: ['STATE', 'REGION'],
-    TALUK: ['DISTRICT'],
-    VILLAGE: ['TALUK'],
+    MANDAL: ['DISTRICT'],
+    VILLAGE: ['MANDAL'],
     HAMLET: ['VILLAGE'],
   },
   REVENUE: {
     DISTRICT: ['STATE', 'REGION'],
-    TALUK: ['DISTRICT'],
-    PANCHAYAT: ['TALUK'],
-    VILLAGE: ['PANCHAYAT', 'TALUK'],
+    MANDAL: ['DISTRICT'],
+    PANCHAYAT: ['MANDAL'],
+    VILLAGE: ['PANCHAYAT', 'MANDAL'],
     HAMLET: ['VILLAGE'],
   },
   HEALTH: {
@@ -88,7 +90,7 @@ export function isValidParent(
 
 /** Residence classification on screen 2 — drives which map the client opens. */
 export const RESIDENCE_TYPES = [
-  { code: 'HOME_STATE', name: 'Tamil Nadu', mapScope: 'STATE' },
+  { code: 'HOME_STATE', name: 'Telangana', mapScope: 'STATE' },
   { code: 'OTHER_STATE', name: 'Other States (India)', mapScope: 'COUNTRY' },
   { code: 'FOREIGNER', name: 'Foreigner', mapScope: 'WORLD' },
 ] as const;
@@ -106,7 +108,7 @@ export const MAP_DRILL_DEPTH: Record<ResidenceType, AddressLevel> = {
 export const ONSET_PLACES = [
   { code: 'HOME', name: 'Home', note: 'Defaults to the residence address' },
   { code: 'FESTIVAL_AREA', name: 'Festival Area', note: 'Select the zone / sub-division' },
-  { code: 'ENROUTE', name: 'En route to festival', note: 'District > Taluk > Village > Hamlet' },
+  { code: 'ENROUTE', name: 'En route to festival', note: 'District > Mandal > Village > Habitation' },
 ] as const;
 
 export type OnsetPlace = (typeof ONSET_PLACES)[number]['code'];

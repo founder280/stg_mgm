@@ -47,13 +47,13 @@ describe('aberration detection', () => {
 
 describe('spatial analysis', () => {
   it('measures distance between two known points', () => {
-    // Chennai to Cuddalore, roughly 170 km.
+    // Hyderabad to Warangal, roughly 135 km.
     const km = haversineKm(
-      { latitude: 13.0827, longitude: 80.2707 },
-      { latitude: 11.748, longitude: 79.7714 },
+      { latitude: 17.385, longitude: 78.4867 },
+      { latitude: 17.9784, longitude: 79.5941 },
     );
-    expect(km).toBeGreaterThan(150);
-    expect(km).toBeLessThan(190);
+    expect(km).toBeGreaterThan(120);
+    expect(km).toBeLessThan(150);
   });
 
   it('groups nearby cases and leaves outliers as noise', () => {

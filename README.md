@@ -60,16 +60,16 @@ npm run dev:web          # http://localhost:5173  — console
 npm run dev:mobile       # http://localhost:5174  — field app
 ```
 
-The seed builds a complete worked example: the Karthigai Deepam festival at
-Tiruvannamalai across three districts, a zoned festival area, eight camps, staff
-for every role, and around 1,700 walk-ins over ten days — including a planted
+The seed builds a complete worked example: the Sammakka–Saralamma Jatara at
+Medaram, Mulugu district, across three districts of Telangana, a zoned
+gathering area, eight camps, staff for every role, and around 1,700 walk-ins over ten days — including a planted
 waterborne diarrhoea outbreak in one sector, so the detectors have something
 real to find. Run `npm run analytics:run --workspace @mgms/api` after seeding to
 populate the alerts immediately.
 
-Sign in as `state.admin` / `ChangeMe@2026`. Other useful accounts: `district.tvm`
-(one district), `girin1.sup` (a camp supervisor), `girin1.mo` (a medical
-officer), `girin1.vol1` (a volunteer). Every account uses the same seed password.
+Sign in as `state.admin` / `ChangeMe@2026`. Other useful accounts: `district.mulugu`
+(one district), `jatn1.sup` (a camp supervisor), `jatn1.mo` (a medical
+officer), `jatn1.vol1` (a volunteer). Every account uses the same seed password.
 
 ### With Docker
 

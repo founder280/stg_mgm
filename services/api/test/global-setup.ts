@@ -2,6 +2,7 @@ import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import dotenv from 'dotenv';
+import { requireTestDatabase } from './require-test-database.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const apiRoot = path.resolve(here, '..');
@@ -23,6 +24,7 @@ export default function setup() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not set; check services/api/.env.test');
   }
+  requireTestDatabase(process.env.DATABASE_URL);
 
   execSync('npx prisma migrate deploy', {
     cwd: apiRoot,

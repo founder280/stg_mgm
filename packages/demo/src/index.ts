@@ -143,7 +143,7 @@ export async function handleDemoRequest(
       const username = String(body.username ?? '').trim();
       const user = state.users.find((u) => u.username === username);
       if (!user) {
-        return fail(401, 'UNAUTHORIZED', 'No such demonstration account. Try state.admin, district.tvm or girin1.vol1.');
+        return fail(401, 'UNAUTHORIZED', 'No such demonstration account. Try state.admin, district.mulugu or jatn1.vol1.');
       }
       signedIn = user;
       return ok({

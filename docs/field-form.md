@@ -55,23 +55,23 @@ aggregation needs no per-row arithmetic.
 Male / Female / Transgender.
 
 ### 4. Address of residence
-Tamil Nadu, other Indian states, or foreigner — each opening a different scope
+Telangana, other Indian states, or foreigner — each opening a different scope
 of place picker.
 
 Three parallel hierarchies over one village tree, as the specification requires:
 
-- Revenue: District › Taluk › Panchayat › Village › Hamlet
-- Health: District › HUD › Block › PHC › HSC › Village › Hamlet
-- Data entry: District › Taluk › Village › Hamlet
+- Revenue: District › Mandal › Panchayat › Village › Habitation
+- Health: District › HUD › Block › PHC › HSC › Village › Habitation
+- Data entry: District › Mandal › Village › Habitation
 
 Stored as one self-referencing `AddressUnit` tree tagged with a `hierarchy`, so a
-hamlet is reachable from either chain and a case can be routed to both the
+habitation is reachable from either chain and a case can be routed to both the
 revenue officer and the DSU-IDSP of its area. Names carry a local-language
 field alongside English.
 
 The specification describes a map interface; the field app implements the same
 drill-down interaction without tiles, because a camp tablet has no route to
-fetch them. The result is identical — a hamlet id, whose pre-fixed geocode is
+fetch them. The result is identical — a habitation id, whose pre-fixed geocode is
 what the surveillance analysis actually runs on.
 
 ### 5. Mobile number

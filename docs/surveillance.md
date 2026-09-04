@@ -51,7 +51,7 @@ keeps the computation cheap enough to run on every dashboard refresh. The
 threshold for raising an alert is a likelihood ratio above 5 with a relative risk
 above 1.5.
 
-**DBSCAN** is also available for clustering individual cases by hamlet geocode,
+**DBSCAN** is also available for clustering individual cases by habitation geocode,
 where the question is "is there a cluster at all" rather than "which pre-defined
 area carries excess risk". It finds clusters of any shape and does not split one
 that straddles a grid boundary.

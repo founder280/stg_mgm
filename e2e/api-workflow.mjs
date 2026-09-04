@@ -16,7 +16,7 @@ const report = createReporter('API — clinical workflow, permissions and sync')
 const { check } = report;
 
 // --- The volunteer's leg: screens 1 to 5 ---------------------------------
-const volunteer = await signIn('girin1.vol1');
+const volunteer = await signIn('jatn1.vol1');
 check('a volunteer signs in', !!volunteer.accessToken, volunteer.user.roleName);
 check(
   'their scope is limited to one camp',
@@ -43,7 +43,7 @@ const registration = {
   injuries: [],
   bites: [],
   onsetPlace: 'FESTIVAL_AREA',
-  capture: capture('girin1.vol1'),
+  capture: capture('jatn1.vol1'),
 };
 
 const created = await api('/api/walk-ins', { method: 'POST', token: volunteer.accessToken, body: registration });
@@ -58,16 +58,16 @@ check('replaying the same submission cannot duplicate a patient', replay.data.du
 const forbidden = await api(`/api/walk-ins/${walkInId}/vitals`, {
   method: 'POST',
   token: volunteer.accessToken,
-  body: { systolic: 120, diastolic: 80, capture: capture('girin1.vol1') },
+  body: { systolic: 120, diastolic: 80, capture: capture('jatn1.vol1') },
 });
 check('a volunteer cannot record vitals', forbidden.status === 403, forbidden.data?.error?.message);
 
 // --- The paramedic's leg: screen 6 ---------------------------------------
-const paramedic = await signIn('girin1.para');
+const paramedic = await signIn('jatn1.para');
 const vitals = await api(`/api/walk-ins/${walkInId}/vitals`, {
   method: 'POST',
   token: paramedic.accessToken,
-  body: { weightKg: 68, heightCm: 172, systolic: 86, diastolic: 54, pulse: 126, temperatureF: 103.6, capture: capture('girin1.para') },
+  body: { weightKg: 68, heightCm: 172, systolic: 86, diastolic: 54, pulse: 126, temperatureF: 103.6, capture: capture('jatn1.para') },
 });
 check('a paramedic records measurements', vitals.status === 200);
 check('BMI is derived', vitals.data.derived?.bmi === 23, String(vitals.data.derived?.bmi));
@@ -82,7 +82,7 @@ check(
 check('the IDSP reference travels with the record', detail.data.walkIn.syndromes[0].reference.includes('IDSP'));
 
 // --- The medical officer's leg: screens 7 to 9 ---------------------------
-const officer = await signIn('girin1.mo');
+const officer = await signIn('jatn1.mo');
 const inventory = await api(`/api/camps/${camp.id}/inventory`, { token: officer.accessToken });
 const drug = inventory.data.items.find((i) => i.drugCode === 'PARACETAMOL' && i.onHand >= 20)
   ?? inventory.data.items.find((i) => i.onHand >= 20);
@@ -100,7 +100,7 @@ const clinical = await api(`/api/walk-ins/${walkInId}/clinical`, {
     dressing: { performed: false },
     referral: { required: true, ambulanceRequested: true, speciality: 'GENERAL_MEDICINE', reason: 'Hypotension with bleeding' },
     advice: 'Immediate transfer, no NSAIDs.',
-    capture: capture('girin1.mo'),
+    capture: capture('jatn1.mo'),
   },
 });
 check('the medical officer completes the consultation', clinical.status === 200);
@@ -131,21 +131,21 @@ const push = await api('/api/sync/push', {
         kind: 'REGISTRATION',
         clientId: registrationClientId,
         queuedAt: new Date().toISOString(),
-        payload: { ...registration, name: 'Offline Pilgrim', capture: capture('girin1.para') },
+        payload: { ...registration, name: 'Offline Pilgrim', capture: capture('jatn1.para') },
       },
       {
         kind: 'VITALS',
         clientId: crypto.randomUUID(),
         queuedAt: new Date().toISOString(),
         walkInClientId: registrationClientId,
-        payload: { pulse: 88, temperatureF: 101.2, capture: capture('girin1.para') },
+        payload: { pulse: 88, temperatureF: 101.2, capture: capture('jatn1.para') },
       },
       {
         kind: 'VITALS',
         clientId: crypto.randomUUID(),
         queuedAt: new Date().toISOString(),
         walkInClientId: crypto.randomUUID(),
-        payload: { pulse: 70, capture: capture('girin1.para') },
+        payload: { pulse: 70, capture: capture('jatn1.para') },
       },
     ],
   },
@@ -171,26 +171,26 @@ const foreignCamp = allCamps.data.items.find((c) => c.id !== camp.id);
 const crossAccess = await api(`/api/camps/${foreignCamp.id}/inventory`, { token: paramedic.accessToken });
 check('a camp device cannot reach another camp', crossAccess.status === 403);
 
-const district = await signIn('district.tvm');
+const district = await signIn('district.mulugu');
 const districtCamps = await api('/api/camps', { token: district.accessToken });
 check(
   'a district officer sees their own district',
-  districtCamps.data.items.length > 0 && districtCamps.data.items.every((c) => c.district.name === 'Tiruvannamalai'),
+  districtCamps.data.items.length > 0 && districtCamps.data.items.every((c) => c.district.name === 'Mulugu'),
   `${districtCamps.data.items.length} camp(s)`,
 );
 
-const otherDistrict = await signIn('district.cud');
+const otherDistrict = await signIn('district.bhupalpally');
 const otherCamps = await api('/api/camps', { token: otherDistrict.accessToken });
 check('a neighbouring district sees none of them', otherCamps.data.items.length === 0);
 
-const supervisor = await signIn('girin1.sup');
+const supervisor = await signIn('jatn1.sup');
 check('a supervisor cannot administer roles', (await api('/api/roles', { token: supervisor.accessToken })).status === 403);
 
 // --- The form's own validation rules -------------------------------------
 const invalid = await api('/api/walk-ins', {
   method: 'POST',
   token: volunteer.accessToken,
-  body: { ...registration, name: 'R@jesh 123', mobile: '12345', capture: capture('girin1.vol1') },
+  body: { ...registration, name: 'R@jesh 123', mobile: '12345', capture: capture('jatn1.vol1') },
 });
 check(
   'a bad name and mobile number are rejected with per-field reasons',

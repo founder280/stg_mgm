@@ -128,7 +128,7 @@ export async function seedFixture(): Promise<Fixture> {
   const drugIds = Object.fromEntries((await prisma.drug.findMany()).map((d) => [d.code, d.id]));
 
   const state = await prisma.addressUnit.create({
-    data: { code: 'TN', name: 'Tamil Nadu', level: 'STATE', hierarchy: 'ADMIN', path: '', depth: 0 },
+    data: { code: 'TG', name: 'Telangana', level: 'STATE', hierarchy: 'ADMIN', path: '', depth: 0 },
   });
   const districtA = await prisma.addressUnit.create({
     data: { code: 'D-A', name: 'District A', level: 'DISTRICT', parentId: state.id, path: `${state.id}/`, depth: 1, latitude: 12.2, longitude: 79.07 },

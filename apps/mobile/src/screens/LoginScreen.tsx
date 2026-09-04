@@ -38,8 +38,8 @@ export function LoginScreen() {
         {IS_DEMO && (
           <div className="banner warn">
             <strong>Demonstration.</strong> No server and no database — the app answers itself in your browser. Sign in
-            as <strong>girin1.vol1</strong> (volunteer), <strong>girin1.para</strong> (paramedic) or{' '}
-            <strong>girin1.mo</strong> (medical officer); any password works. The offline behaviour is real: turn your
+            as <strong>jatn1.vol1</strong> (volunteer), <strong>jatn1.para</strong> (paramedic) or{' '}
+            <strong>jatn1.mo</strong> (medical officer); any password works. The offline behaviour is real: turn your
             network off and keep going.
           </div>
         )}
@@ -63,9 +63,9 @@ export function LoginScreen() {
           />
           {IS_DEMO && (
             <div className="row" style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-              {['girin1.vol1', 'girin1.para', 'girin1.mo'].map((account) => (
+              {['jatn1.vol1', 'jatn1.para', 'jatn1.mo'].map((account) => (
                 <button key={account} type="button" className="btn small" onClick={() => setUsername(account)}>
-                  {account.replace('girin1.', '')}
+                  {account.replace('jatn1.', '')}
                 </button>
               ))}
             </div>

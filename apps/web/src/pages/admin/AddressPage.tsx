@@ -21,7 +21,7 @@ interface AddressUnit {
  * The address hierarchy browser.
  *
  * The same villages are reachable through three parallel chains — administrative,
- * revenue (District > Taluk > Panchayat > Village > Hamlet) and health
+ * revenue (District > Mandal > Panchayat > Village > Habitation) and health
  * (District > HUD > Block > PHC > HSC > Village > Hamlet) — because a case has
  * to be routed to both the revenue officer and the health unit of its area.
  */
